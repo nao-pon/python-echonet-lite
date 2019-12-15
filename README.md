@@ -1,40 +1,41 @@
-python-echonet-lite
-===================
+# Wi-SUN Gateway
 
-これはなに？
-------------
+## 概要
 
-ECHONET Lite機器を持っていない私が [Kadecot][] を試すために作った、
-[ECHONET Lite][] プロトコルのPure Python実装です。
+Ｂルート接続されたスマートメータとの Wi-SUN 通信を、 Ethernet 通信に変換するものです。
 
-使い方
-------
+## 変更点
 
-main.py
+- 本プロダクトは、Keisuke Minami 氏の[python-echonet-lite](https://github.com/kminami/python-echonet-lite)を流用しています。
+- 変更点は以下の通りです。
+  - Frame クラス
+    - get_key()メソッドの追加
+  - Node クラス
+    - socketオブジェクトをローカル変数からインスタンス変数に変更
+    - _deliver()メソッドとservice()メソッドの引数に通信相手のIPアドレスを追加
+    - sendto()メソッドの追加
+  - Property クラス
+    - EDT値の取り出し位置を修正
+    - Nodeオブジェクトの保持とgetter／setterの追加
 
-    import echonet_lite
-    
-    node = echonet_lite.Node()
-    node.add_object(echonet_lite.GeneralLighting())
-    node.loop(debug=True)
+## 設定
+- config.ini
+    - pwd…Bルートパスワード
+    - bid…BルートID
+    - serial_port…Wi-SUNモジュールが接続されているシリアルデバイス名
+    ```
+    [smartmeter]
+    pwd = <password for B-route>
+    bid = <id for B-route>
+    serial_port = /dev/ttyAMA0
+    ```
 
-echonet_lite.GeneralLighting クラスのように、
-echonet_lite.Object クラスを継承してservice関数を実装すれば、
-任意のECHONETオブジェクトを実装できるかもしれません。
-
-進捗
-----
-
-2014/10/13 ひとまずKadecotが認識するところまで。
-
-License
--------
+## License
 
 Copyright 2014 Keisuke Minami
+Copyright 2019 katsumin
 
 Apache License 2.0
 
-
-[ECHONET Lite]: http://www.echonet.gr.jp/ "ECHONET Lite"
-[Kadecot]: http://kadecot.net/ "Kadecot"
-
+[echonet lite]: http://www.echonet.gr.jp/ "ECHONET Lite"
+[kadecot]: http://kadecot.net/ "Kadecot"
