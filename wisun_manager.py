@@ -25,6 +25,7 @@ class WisunManager(metaclass=ABCMeta):
         self._ser.timeout = 2.0
         # reset
         self._reset = LED(18, False)
+        self.reset()
         # 送信タスク用リソース
         self._sndThread = None
         self._queueSend = None
@@ -38,6 +39,7 @@ class WisunManager(metaclass=ABCMeta):
         self._reset.on()
         sleep(0.5)
         self._reset.off()
+        sleep(0.5)
 
     # 終了処理
     def dispose(self):
