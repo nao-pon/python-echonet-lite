@@ -9,9 +9,9 @@ SW4 = 3
 # pin, pullup, active_state, bounce_time, hold_time
 gpio_pins = [
     [5, True, None, None, 2],
-    [9, True, None, None, 2],
     [22, True, None, None, 2],
-    [23, True, None, None, 2]
+    [27, True, None, None, 2],
+    [17, True, None, None, 2]
 ]
 
 
@@ -52,7 +52,7 @@ class ButtonDriver:
     def enablePowerButton(self):
         # self._ponDis.on()
         self._ponDis.close()
-        LED(4,False)
+        LED(4, False)
         # self._sw[POWER].close()
         # LED(gpio_pins[POWER][0],False)
         # self._ponDis.close()
