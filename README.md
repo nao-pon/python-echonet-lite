@@ -6,23 +6,44 @@
 
 ## 変更点
 
-- 本プロダクトは、Keisuke Minami 氏の[python-echonet-lite](https://github.com/kminami/python-echonet-lite)を流用しています。
-- 変更点は以下の通りです。
-  - Frame クラス
-    - get_key()メソッドの追加
-  - Node クラス
-    - socketオブジェクトをローカル変数からインスタンス変数に変更
-    - _deliver()メソッドとservice()メソッドの引数に通信相手のIPアドレスを追加
-    - sendto()メソッドの追加
-  - Property クラス
-    - EDT値の取り出し位置を修正
-    - Nodeオブジェクトの保持とgetter／setterの追加
+-   本プロダクトは、Keisuke Minami 氏の[python-echonet-lite](https://github.com/kminami/python-echonet-lite)を流用しています。
+-   変更点は以下の通りです。
+    -   Frame クラス
+        -   get_key()メソッドの追加
+    -   Node クラス
+        -   socket オブジェクトをローカル変数からインスタンス変数に変更
+        -   \_deliver()メソッドと service()メソッドの引数に通信相手の IP アドレスを追加
+        -   sendto()メソッドの追加
+    -   Property クラス
+        -   EDT 値の取り出し位置を修正
+        -   Node オブジェクトの保持と getter／setter の追加
+
+## インストール
+
+-   ソース取得
+
+```
+pi@raspberrypi:~ $ sudo apt-get update
+pi@raspberrypi:~ $ sudo apt-get upgrade
+pi@raspberrypi:~ $ sudo apt-get -y install git
+pi@raspberrypi:~ $ git clone -b wisun-gateway https://github.com/katsumin/python-echonet-lite wisun-gateway
+```
+
+-   インストール
+    -   依存ライブラリ取得
+    -   関連ツールのインストール
+    -   自動起動設定
+    ```
+    pi@raspberrypi:~ $ cd wisun-gateway
+    pi@raspberrypi:~/wisun-gateway $ sh install.sh
+    ```
 
 ## 設定
-- config.ini
-    - pwd…Bルートパスワード
-    - bid…BルートID
-    - serial_port…Wi-SUNモジュールが接続されているシリアルデバイス名
+
+-   config.ini
+    -   pwd…B ルートパスワード
+    -   bid…B ルート ID
+    -   serial_port…Wi-SUN モジュールが接続されているシリアルデバイス名
     ```
     [smartmeter]
     pwd = <password for B-route>

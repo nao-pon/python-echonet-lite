@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>sample</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+
+<body>
+    <h1>Wi-SUN Ethernet Converter</h1>
+    <!-- メインコンテンツ -->
+    <form action="/register" method="post">
+        <p>
+            <label id="label-pwd" for="pwd">Ｂルートパスワード</label>
+            <input name="pwd" id="pwd" type="password" />
+        </p>
+        <p>
+            <label id="label-bid" for="bid">ＢルートＩＤ</label>
+            <input name="bid" id="bid" type="input" />
+        </p>
+        <p>
+            <label id="label-ser" for="ser">シリアルポート</label>
+            <select name="ser" id="ser">
+                <option>/dev/ttyAMA0</option>
+                <option>/dev/ttyS0</option>
+            </select>
+        </p>
+        <button id="btn-reg" name="post-value">登録</button>
+    </form>
+</body>
+
+</html>
