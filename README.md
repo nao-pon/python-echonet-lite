@@ -20,14 +20,22 @@
 
 ## インストール
 
+-   環境設定
+
+    -   SPI、シリアルを有効にする
+
+    ```
+    pi@raspberrypi:~ $ sudo raspi-config
+    ```
+
 -   ソース取得
 
-```
-pi@raspberrypi:~ $ sudo apt-get update
-pi@raspberrypi:~ $ sudo apt-get upgrade
-pi@raspberrypi:~ $ sudo apt-get -y install git
-pi@raspberrypi:~ $ git clone -b wisun-gateway https://github.com/katsumin/python-echonet-lite wisun-gateway
-```
+    ```
+    pi@raspberrypi:~ $ sudo apt update
+    pi@raspberrypi:~ $ sudo apt upgrade
+    pi@raspberrypi:~ $ sudo apt -y install git
+    pi@raspberrypi:~ $ git clone -b wisun-gateway https://github.com/katsumin/python-echonet-lite wisun-gateway
+    ```
 
 -   インストール
     -   依存ライブラリ取得
@@ -40,16 +48,21 @@ pi@raspberrypi:~ $ git clone -b wisun-gateway https://github.com/katsumin/python
 
 ## 設定
 
--   config.ini
-    -   pwd…B ルートパスワード
-    -   bid…B ルート ID
-    -   serial_port…Wi-SUN モジュールが接続されているシリアルデバイス名
-    ```
-    [smartmeter]
-    pwd = <password for B-route>
-    bid = <id for B-route>
-    serial_port = /dev/ttyAMA0
-    ```
+-   下記のいずれかの方法で設定する
+    1.  config.ini を直接編集
+        -   pwd…Ｂルートパスワード
+        -   bid…ＢルートＩＤ
+        -   serial_port…Wi-SUN モジュールが接続されているシリアルデバイス名
+
+
+        ```
+        [smartmeter]
+        pwd = <password for B-route>
+        bid = <id for B-route>
+        serial_port = /dev/ttyAMA0
+        ```
+    1.  ブラウザで「http://<IP アドレス>:9000」にアクセスして、Ｂルートパスワード・ＢルートＩＤ・シリアルデバイス名を設定する。
+        ![](web-config.png)
 
 ## License
 
