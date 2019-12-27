@@ -4,7 +4,7 @@ from threading import Event, Thread
 from echonet_lite import Object, Frame, Node, Property
 import serial
 import time
-from queue import Queue,Empty
+from queue import Queue, Empty
 from configparser import ConfigParser
 from wisun_manager import WisunManager
 from logging import getLogger, StreamHandler, INFO, Formatter
@@ -19,12 +19,6 @@ class WisunManager(WisunManager):
     # モジュール有効状態チェック
     def isActive(self):
         return self._sendAndWaitOk(b"SKVER\r\n")
-
-    def _serialSendLine(self, str):
-        self._ser.write(str)
-
-    def _serialReceiveLine(self):
-        return self._ser.readline()
 
     def _sendAndWaitOk(self, statement):
         self._serialSendLine(statement)

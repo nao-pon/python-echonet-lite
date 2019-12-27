@@ -21,8 +21,9 @@
         <p>
             <label id="label-ser" for="ser">シリアルポート</label>
             <select name="ser" id="ser">
-                <option>/dev/ttyAMA0</option>
-                <option>/dev/ttyS0</option>
+                {% for device in devices %}
+                <option>{{ device }}</option>
+                {% endfor %}
             </select>
         </p>
         <button id="btn-reg" name="post-value">登録</button>

@@ -10,28 +10,58 @@ from set_queue import SetQueue
 from logging import getLogger, StreamHandler, INFO, Formatter
 logger = getLogger(__name__)
 
+
 class ComError(Exception):
-  pass
+    pass
 
 # Wi-SUNマネージャ基底クラス
+
+
 class WisunManager(metaclass=ABCMeta):
     # 初期化
     def __init__(self, pwd, bid, dev):
-        # Wi-SUN
-        self._pwd = pwd
-        self._bid = bid
-        # シリアルポート初期化
-        self._ser = serial.Serial(dev, 115200)
-        self._ser.timeout = 2.0
-        # reset
-        self._reset = LED(18, False)
-        self.reset()
-        # 送信タスク用リソース
-        self._sndThread = None
-        self._queueSend = None
-        # 受信タスク開始
-        self.startReceiveTask()
-        self._propMan = None
+        try:
+            # Wi-SUN
+            self._pwd = pwd
+            self._bid = bid
+            # シリアルポート初期化
+            self._ser = serial.Serial(dev, 115200)
+            self._ser.timeout = 2.0
+            self._ser.write_timeout = 2.0
+        except serial.SerialException:
+            logger.error('Serial port Error')
+            self._ser = None
+        finally:
+            # reset
+            self._reset = LED(18, False)
+            self.reset()
+            # 受信タスク開始
+            self.startReceiveTask()
+            # 送信タスク用リソース
+            self._sndThread = None
+            self._queueSend = None
+            self._propMan = None
+
+    # シリアル送信
+    def _serialSendLine(self, str):
+        if self._ser is not None:
+            self._ser.write(str)
+
+    # シリアル受信
+    def _serialReceiveLine(self):
+        if self._ser is not None:
+            return self._ser.readline()
+        else:
+            sleep(2)
+            return b''
+
+    # シリアル受信
+    def _serialReceive(self, size):
+        if self._ser is not None:
+            return self._ser.read(size)
+        else:
+            sleep(2)
+            return b''
 
     # H/Wリセット
     def reset(self):
@@ -47,7 +77,8 @@ class WisunManager(metaclass=ABCMeta):
         self.stopSendTask()
         self.stopReceiveTask()
         self._reset.close()
-        self._ser.close()
+        if self._ser is not None:
+            self._ser.close()
 
     # Propertyマネージャ設定
     def setPropertyManager(self, pm):
@@ -73,7 +104,7 @@ class WisunManager(metaclass=ABCMeta):
     # モジュール有効状態チェック
     @abstractmethod
     def isActive(self):
-      pass
+        pass
 
     # スマートメータにプロパティ要求
     def get(self, frame):
@@ -89,16 +120,17 @@ class WisunManager(metaclass=ABCMeta):
 
     # 送信タスク終了
     def stopSendTask(self):
-      if self._sndThread is None:
-        return
-      self._stopSendEvent.set()
-      self._sndThread.join()
-      self._sndThread = None
+        if self._sndThread is None:
+            return
+        self._stopSendEvent.set()
+        self._sndThread.join()
+        self._sndThread = None
 
     # WiSUN送信タスク
     def _sndTask(self, queue):
         logger.info('send task start')
-        req = Frame(bytearray([0x10, 0x81, 0x00, 0x01, 0x05, 0xff, 0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
+        req = Frame(bytearray([0x10, 0x81, 0x00, 0x01, 0x05, 0xff,
+                               0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
         while not self._stopSendEvent.wait(15.0):
             try:
                 frame = queue.get_nowait()
@@ -115,19 +147,19 @@ class WisunManager(metaclass=ABCMeta):
     # 受信タスク開始
     @abstractmethod
     def startReceiveTask(self):
-      pass
+        pass
 
     # 受信タスク終了
     @abstractmethod
     def stopReceiveTask(self):
-      pass
+        pass
 
     # Wi-SUN切断
     @abstractmethod
     def disconnect(self):
-      pass
+        pass
 
     # Wi-SUN接続
     @abstractmethod
     def connect(self):
-      pass
+        pass

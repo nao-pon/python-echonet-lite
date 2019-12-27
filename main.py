@@ -3,7 +3,7 @@ from echonet_lite import Node
 from wisun_manager_factory import WisunManagerFactory
 from ethernet_manager import EthernetManager
 from property_manager import PropertyManager
-from logging import getLogger, StreamHandler, INFO, Formatter
+from logging import getLogger, StreamHandler, INFO, Formatter, DEBUG
 import time
 from btn_drv import ButtonDriver, POWER, SW2, SW3, SW4
 from view_manager_power import ViewManagerPower
@@ -17,8 +17,9 @@ import sys
 
 # ログの設定
 handler = StreamHandler()
-handler.setLevel(INFO)
-handler.setFormatter(Formatter("[%(asctime)s] [%(levelname)s] [%(threadName)s] [%(name)s] %(message)s"))
+handler.setLevel(DEBUG)
+handler.setFormatter(Formatter(
+    "[%(asctime)s] [%(levelname)s] [%(threadName)s] [%(name)s] %(message)s"))
 logger = getLogger()
 logger.addHandler(handler)
 logger.setLevel(INFO)
@@ -36,6 +37,7 @@ vmi = ViewManagerInfo()
 vmp = ViewManagerPower()
 vmp.setPropertyManager(pm)
 
+
 class ConnectState(Enum):
     DISCONNECT = 0
     CONNECTING = 1
@@ -43,11 +45,14 @@ class ConnectState(Enum):
     CONNECT_ERROR = 3
     DEVICE_ERROR = 4
 
+
 thread = None
 if wm is None:
     connect_state = ConnectState.DEVICE_ERROR
 else:
     connect_state = ConnectState.DISCONNECT
+
+
 def main():
     global thread
     global connect_state
@@ -65,7 +70,8 @@ def main():
         if connect_state == ConnectState.CONNECTED:
             if bd.isPressed(SW3):
                 # スマートメータ切断
-                wm.disconnect()
+                if wm is not None:
+                    wm.disconnect()
         elif connect_state == ConnectState.DISCONNECT:
             vmi.setInfo('未接続', 20)
             if bd.isPressed(SW2) and thread is None:
@@ -102,7 +108,11 @@ def main():
         time.sleep(0.1)
 
 # Wi-SUN接続タスク起動
+
+
 def startConnect():
+    if wm is None:
+        return
     global thread
     global connect_state
     connect_state = ConnectState.CONNECTING
@@ -110,6 +120,8 @@ def startConnect():
     thread.start()
 
 # Wi-SUN接続タスク
+
+
 def connect_task():
     global thread
     global connect_state
@@ -124,12 +136,15 @@ def connect_task():
         connect_state = ConnectState.CONNECT_ERROR
     thread = None
 
+
 def dispose():
     # EthernetベースのEchonet処理終了
     em.stop()
     # スマートメータ切断
-    wm.disconnect()
-    wm.dispose()
+    if wm is not None:
+        wm.disconnect()
+        wm.dispose()
+
 
 def termed(signum, frame):
     logger.info('SIGTERM!')
