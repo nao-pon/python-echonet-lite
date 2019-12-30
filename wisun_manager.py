@@ -44,8 +44,13 @@ class WisunManager(metaclass=ABCMeta):
 
     # シリアル送信
     def _serialSendLine(self, str):
-        if self._ser is not None:
+        if self._ser is None:
+            return False
+        try:
             self._ser.write(str)
+            return True
+        except serial.serialutil.SerialTimeoutException:
+            return False
 
     # シリアル受信
     def _serialReceiveLine(self):

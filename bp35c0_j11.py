@@ -121,7 +121,7 @@ class WisunManager(WisunManager):
         buf = struct.pack('>{0}sHH{1}s'.format(
             len(buf), data_len), buf, hs, sum(data), data)
         logger.debug(self._dump(buf))
-        self._serialSendLine(buf)
+        return self._serialSendLine(buf)
 
     # 受信タスク開始
     def startReceiveTask(self):
@@ -227,7 +227,8 @@ class WisunManager(WisunManager):
 
     def _getVersion(self):
         # バージョン取得
-        self.sendReq(CMD_GET_VERSION, b'')
+        if self.sendReq(CMD_GET_VERSION, b'') is False:
+            return False
         return self._waitOk('CMD_GET_VERSION error', RES_GET_VERSION)
 
     def _initialize(self, ch):

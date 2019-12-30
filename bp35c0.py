@@ -21,7 +21,8 @@ class WisunManager(WisunManager):
         return self._sendAndWaitOk(b"SKVER\r\n")
 
     def _sendAndWaitOk(self, statement):
-        self._serialSendLine(statement)
+        if self._serialSendLine(statement) is False:
+            return False
         return self._waitOk(statement)
 
     def _waitOk(self, message):
