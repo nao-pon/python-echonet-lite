@@ -72,6 +72,7 @@ def main():
                 # スマートメータ切断
                 if wm is not None:
                     wm.disconnect()
+                    connect_state = ConnectState.DISCONNECT
         elif connect_state == ConnectState.DISCONNECT:
             vmi.setInfo('未接続', 20)
             if bd.isPressed(SW2) and thread is None:

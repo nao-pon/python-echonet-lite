@@ -68,6 +68,10 @@ class WisunManager(WisunManager):
                     # print(bar)
                     frame = Frame(bar)
                     self.putProperty(frame)
+            elif line.startswith(b'EVENT 29'):
+                self.sendPause(True)
+            elif line.startswith(b'EVENT 25'):
+                self.sendPause(False)
             else:
                 queue.put(line)
         logger.info('receive task end')

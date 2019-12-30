@@ -41,6 +41,7 @@ class WisunManager(metaclass=ABCMeta):
             self._sndThread = None
             self._queueSend = None
             self._propMan = None
+            self._sendPause = False
 
     # シリアル送信
     def _serialSendLine(self, str):
@@ -137,12 +138,18 @@ class WisunManager(metaclass=ABCMeta):
         req = Frame(bytearray([0x10, 0x81, 0x00, 0x01, 0x05, 0xff,
                                0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
         while not self._stopSendEvent.wait(15.0):
+            if self._sendPause:
+                continue
             try:
                 frame = queue.get_nowait()
                 self.wisunSendFrame(frame)
             except Empty:
                 self.wisunSendFrame(req)
         logger.info('send task end')
+
+    # 送信一時停止
+    def sendPause(self, pause):
+        self._sendPause = pause
 
     # Wi-SUN経由Echonet送信
     @abstractmethod
