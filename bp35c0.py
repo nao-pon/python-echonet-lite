@@ -4,6 +4,7 @@ from threading import Event, Thread
 from echonet_lite import Object, Frame, Node, Property
 import serial
 import time
+import binascii
 from queue import Queue, Empty
 from configparser import ConfigParser
 from wisun_manager import WisunManager
@@ -14,7 +15,7 @@ logger = getLogger(__name__)
 class WisunManager(WisunManager):
     def __init__(self, pwd, bid, ser):
         super().__init__(pwd, bid, ser)
-        self._smartmeterCh = None
+        self._connected = False
 
     # モジュール有効状態チェック
     def isActive(self):
@@ -55,25 +56,33 @@ class WisunManager(WisunManager):
         logger.info('receive task start')
         while not self._stopReceiveEvent:
             line = self._serialReceiveLine()
-            if line != b'':
+            if line == b'':
                 # timeout
-                print(line)
+                continue
+            logger.info(line)
             if line.startswith(b'ERXUDP'):
                 cols = line.split(b' ')
                 port = int(cols[4], 16)
                 if port == 3610:
                     # echonet lite frame
                     len = int(cols[8], 16)
-                    bar = bytearray(cols[9][0:len])
-                    # print(bar)
+                    # bar = bytearray(cols[9][0:len])
+                    bar = bytearray(binascii.a2b_hex(cols[9][0:len * 2]))
+                    # logger.info(bar)
                     frame = Frame(bar)
+                    # logger.info(frame)
                     self.putProperty(frame)
             elif line.startswith(b'EVENT 29'):
                 self.sendPause(True)
+                if not self._connected:
+                    queue.put(line)
             elif line.startswith(b'EVENT 25'):
                 self.sendPause(False)
+                if not self._connected:
+                    queue.put(line)
             else:
-                queue.put(line)
+                if not self._connected:
+                    queue.put(line)
         logger.info('receive task end')
 
     # Wi-SUN経由Echonet送信
@@ -91,19 +100,44 @@ class WisunManager(WisunManager):
 
     # Wi-SUN切断
     def disconnect(self):
+        # 送信タスク終了
+        self.stopSendTask()
         self._serialSendLine(b"SKTERM\r\n")
         time.sleep(3.0)
         self._clearReceiveQueue()
+        self._connected = False
+
+    # プロダクト設定（受信電文16進ASCII）
+    def _setOpt(self):
+        for i in range(3):
+            if self._serialSendLine(b'ROPT\r\n') is False:
+                return False
+            while True:
+                try:
+                    rd = self._queueRecv.get(True, 3)
+                    if rd.startswith(b'OK 01'):
+                        return True
+                except Empty:
+                    if self._serialSendLine(b'WOPT 01\r\n') is False:
+                        return False
+                    break
+        return False
 
     # Wi-SUN接続
     def connect(self):
         self.disconnect()
-        self._sendAndWaitOk(b"SKVER\r\n")
-        self._sendAndWaitOk(b"SKINFO\r\n")
-        self._sendAndWaitOk(b"ROPT\r\n")
-        self._sendAndWaitOk(b"RUART\r\n")
-        self._sendAndWaitOk("SKSETPWD C {0}\r\n".format(self._pwd).encode())
-        self._sendAndWaitOk("SKSETRBID {0}\r\n".format(self._bid).encode())
+        if self._sendAndWaitOk(b"SKVER\r\n") is False:
+            return False
+        if self._sendAndWaitOk(b"SKINFO\r\n") is False:
+            return False
+        if self._sendAndWaitOk(b"SKSREG SFE 0\r\n") is False:
+            return False
+        if self._setOpt() is False:
+            return False
+        if self._sendAndWaitOk("SKSETPWD C {0}\r\n".format(self._pwd).encode()) is False:
+            return False
+        if self._sendAndWaitOk("SKSETRBID {0}\r\n".format(self._bid).encode()) is False:
+            return False
         scanRes = {}
         flag = True
         while flag:
@@ -114,9 +148,9 @@ class WisunManager(WisunManager):
                 line = self._queueRecv.get()
                 if line.startswith(b'EVENT 22'):
                     try:
-                        # print(scanRes["Channel"])
-                        # print(scanRes["Pan ID"])
-                        # print(scanRes["Addr"])
+                        print(scanRes["Channel"])
+                        print(scanRes["Pan ID"])
+                        print(scanRes["Addr"])
                         flag = False
                         break
                     except KeyError:
@@ -148,7 +182,7 @@ class WisunManager(WisunManager):
         while True:
             # line = self._serialReceiveLine()
             try:
-                line = self._queueRecv.get(True, 10)
+                line = self._queueRecv.get(True, 30)
                 if line.startswith(b'EVENT 24'):
                     break
                 elif line.startswith(b'EVENT 25'):
@@ -157,6 +191,7 @@ class WisunManager(WisunManager):
                 return False
         self._ipv6Addr = ipv6Addr.decode()
         self.startSendTask()
+        self._connected = True
         return True
 
 

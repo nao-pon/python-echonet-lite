@@ -26,7 +26,7 @@ class WisunManager(metaclass=ABCMeta):
             self._bid = bid
             # シリアルポート初期化
             self._ser = serial.Serial(dev, 115200)
-            self._ser.timeout = 2.0
+            self._ser.timeout = 5.0
             self._ser.write_timeout = 2.0
         except serial.SerialException:
             logger.error('Serial port Error')
@@ -53,21 +53,27 @@ class WisunManager(metaclass=ABCMeta):
         except serial.serialutil.SerialTimeoutException:
             return False
 
-    # シリアル受信
+    # シリアル受信（\rをデリミタとし、\nは読み飛ばす）
     def _serialReceiveLine(self):
-        if self._ser is not None:
-            return self._ser.readline()
-        else:
-            sleep(2)
-            return b''
+        s = b''
+        if self._ser is None:
+            sleep(1)
+            return s
+        # return self._ser.readline()
+        while True:
+            c = self._ser.read(1)
+            if c == b'\n':
+                continue
+            if c == b'' or c == b'\r':
+                return s
+            s += c
 
     # シリアル受信
     def _serialReceive(self, size):
-        if self._ser is not None:
-            return self._ser.read(size)
-        else:
-            sleep(2)
+        if self._ser is None:
+            sleep(1)
             return b''
+        return self._ser.read(size)
 
     # H/Wリセット
     def reset(self):
@@ -150,6 +156,10 @@ class WisunManager(metaclass=ABCMeta):
     # 送信一時停止
     def sendPause(self, pause):
         self._sendPause = pause
+        if pause:
+            logger.info('Wi-SUN送信停止')
+        else:
+            logger.info('Wi-SUN送信再開')
 
     # Wi-SUN経由Echonet送信
     @abstractmethod
