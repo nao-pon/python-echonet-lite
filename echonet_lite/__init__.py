@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import socket
+import time
+from logging import getLogger, StreamHandler, INFO, Formatter
+logger = getLogger(__name__)
+logger.setLevel(INFO)
 
 
 class Frame:
@@ -222,14 +226,23 @@ class Node:
         local_address = '0.0.0.0'
         multicast_group = '224.0.23.0'
         port = 3610
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((local_address, port))
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                        socket.inet_aton(multicast_group) + socket.inet_aton(local_address))
-        sock.settimeout(1.0) # timeout=10s
-        return sock
+        while True:
+            sock = None
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind((local_address, port))
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                                socket.inet_aton(multicast_group) + socket.inet_aton(local_address))
+                sock.settimeout(1.0)  # timeout=10s
+                logger.info('bind ok')
+                return sock
+            except Exception:
+                if sock is not None:
+                    sock.close()
+                logger.warn('retry bind')
+                time.sleep(1.0)
 
     def sendto(self, data, addr):
         # self.binaryDump(data)
