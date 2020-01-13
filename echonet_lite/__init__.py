@@ -269,6 +269,9 @@ class Node:
             return True
         except socket.timeout:
             return False
+        except Exception as e:
+            logger.warn('ignore packet: {0}'.format(e))
+            return False
 
     def loop(self, debug=False):
         # sock = self._bind_socket()
