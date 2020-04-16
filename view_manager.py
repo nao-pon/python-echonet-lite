@@ -16,12 +16,13 @@ class ViewManager(metaclass=ABCMeta):
     "Viewマネージャ"
 
     # 初期化
-    def __init__(self):
+    def __init__(self, iniFile):
         self._device = self.get_device(
-            ['--config', '/home/pi/wisun-gateway/display.conf'])
+            ['--config', iniFile.get('view', 'config_file')])
         self._width = min(self._device.width, 240)
         self._height = min(self._device.height, 240)
-        self._font = self.make_font("code2000.ttf", 10)
+        self._font = self.make_font(iniFile.get(
+            'view', 'header_font'), int(iniFile.get('view', 'font_small')))
         self._date = None
         self._pm = None
         with canvas(self._device) as draw:

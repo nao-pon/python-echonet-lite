@@ -14,6 +14,7 @@ import os
 from threading import Event, Thread
 import signal
 import sys
+from configparser import ConfigParser
 
 # ログの設定
 handler = StreamHandler()
@@ -24,6 +25,10 @@ logger = getLogger()
 logger.addHandler(handler)
 logger.setLevel(INFO)
 
+# config
+iniFile = ConfigParser()
+iniFile.read('/home/pi/wisun-gateway/config.ini')
+
 # Wi-SUNマネージャ
 wm = WisunManagerFactory.createInstance()
 # Ethernetマネージャ
@@ -33,8 +38,8 @@ pm = PropertyManager()
 pm.setWisunManager(wm)
 pm.setEthernetManager(em)
 # Viewマネージャ
-vmi = ViewManagerInfo()
-vmp = ViewManagerPower()
+vmi = ViewManagerInfo(iniFile)
+vmp = ViewManagerPower(iniFile)
 vmp.setPropertyManager(pm)
 
 
@@ -74,17 +79,17 @@ def main():
                     wm.disconnect()
                     connect_state = ConnectState.DISCONNECT
         elif connect_state == ConnectState.DISCONNECT:
-            vmi.setInfo('未接続', 20)
+            vmi.setInfo('未接続', int(iniFile.get('view', 'font_middle')))
             if bd.isPressed(SW2) and thread is None:
                 startConnect()
         elif connect_state == ConnectState.CONNECTING:
-            vmi.setInfo('接続中', 20)
+            vmi.setInfo('接続中', int(iniFile.get('view', 'font_middle')))
         elif connect_state == ConnectState.CONNECT_ERROR:
-            vmi.setInfo('接続失敗', 20)
+            vmi.setInfo('接続失敗', int(iniFile.get('view', 'font_middle')))
             if bd.isPressed(SW2) and thread is None:
                 startConnect()
         elif connect_state == ConnectState.DEVICE_ERROR:
-            vmi.setInfo('無線モジュール異常', 10)
+            vmi.setInfo('無線モジュール異常', int(iniFile.get('view', 'font_small')))
         if pre_state != connect_state:
             if connect_state == ConnectState.CONNECTED:
                 vm = vmp
@@ -96,7 +101,7 @@ def main():
 
         if bd.isLongPressed(POWER):
             logger.info("pressed")
-            vmi.setInfo('シャットダウン中', 12)
+            vmi.setInfo('シャットダウン中', int(iniFile.get('view', 'font_small')))
             vm = vmi
             vm.clearPayload()
             vm.reflesh()
