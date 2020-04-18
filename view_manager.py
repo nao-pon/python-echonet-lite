@@ -10,6 +10,7 @@ from luma.core.render import canvas
 from PIL import ImageFont
 import netifaces
 from property_manager import PropertyManager
+from configparser import ConfigParser
 
 
 class ViewManager(metaclass=ABCMeta):
@@ -131,8 +132,8 @@ class ViewManager(metaclass=ABCMeta):
 
 
 class ViewManagerAnalog(ViewManager):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, iniFile):
+        super().__init__(iniFile)
         self._offset_x = self._payloadArea[0]
         self._offset_y = self._payloadArea[1]
         width = self._payloadArea[2] - self._offset_x
@@ -173,7 +174,9 @@ class ViewManagerAnalog(ViewManager):
 
 
 if __name__ == "__main__":
-    vm = ViewManagerAnalog()
+    iniFile = ConfigParser()
+    iniFile.read('/home/pi/wisun-gateway/config.ini')
+    vm = ViewManagerAnalog(iniFile)
     try:
         while True:
             vm.reflesh()

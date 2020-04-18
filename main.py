@@ -82,22 +82,22 @@ def main():
                     wm.disconnect()
                     connect_state = ConnectState.DISCONNECT
         elif connect_state == ConnectState.DISCONNECT:
-            vmi.setInfo('未接続', int(iniFile.get('view', 'font_middle')))
+            vmi.setInfo('未接続', int(iniFile.get('view', 'font_info')))
             if bd.isPressed(SW2) and thread is None:
                 startConnect()
         elif connect_state == ConnectState.CONNECTING:
-            vmi.setInfo('接続中', int(iniFile.get('view', 'font_middle')))
+            vmi.setInfo('接続中', int(iniFile.get('view', 'font_info')))
         elif connect_state == ConnectState.CONNECT_ERROR:
-            vmi.setInfo('接続失敗', int(iniFile.get('view', 'font_middle')))
+            vmi.setInfo('接続失敗', int(iniFile.get('view', 'font_info')))
             if bd.isPressed(SW2) and thread is None:
                 startConnect()
         elif connect_state == ConnectState.DEVICE_ERROR:
             vmi.setInfo('無線モジュール異常', int(iniFile.get('view', 'font_small')))
+        if connect_state == ConnectState.CONNECTED:
+            vm = vmp
+        else:
+            vm = vmi
         if pre_state != connect_state:
-            if connect_state == ConnectState.CONNECTED:
-                vm = vmp
-            else:
-                vm = vmi
             vm.clearPayload()
         vm.reflesh()
         pre_state = connect_state

@@ -11,8 +11,8 @@ class ViewManagerInfo(ViewManager):
         self._offset_x = self._payloadArea[0]
         self._offset_y = self._payloadArea[1]
         self._info = None
-        self._font_size = int(iniFile.get('view', 'font_middle'))
-        self._font_name = iniFile.get('view', 'payload_font')
+        self._font_size = int(iniFile.get('view', 'font_info'))
+        self._font_name = iniFile.get('view', 'info_font')
         self._fontInfo = self.make_font(self._font_name, self._font_size)
 
     # 出力情報設定
