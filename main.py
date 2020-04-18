@@ -72,6 +72,9 @@ def main():
     vm = vmi
     pre_state = connect_state
     while True:
+        if bd.isPressed(SW4):
+            state = vm.get_display_state()
+            vm.set_display_state(not state)
         if connect_state == ConnectState.CONNECTED:
             if bd.isPressed(SW3):
                 # スマートメータ切断

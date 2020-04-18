@@ -17,6 +17,7 @@ class ViewManager(metaclass=ABCMeta):
 
     # 初期化
     def __init__(self, iniFile):
+        self._state = True
         self._device = self.get_device(
             ['--config', iniFile.get('view', 'config_file')])
         self._width = min(self._device.width, 240)
@@ -115,6 +116,18 @@ class ViewManager(metaclass=ABCMeta):
 
     def dispose(self):
         pass
+
+    # 表示状態設定
+    def set_display_state(self, state):
+        self._state = state
+        if self._state:
+            self._device.show()
+        else:
+            self._device.hide()
+
+    # 表示状態取得
+    def get_display_state(self):
+        return self._state
 
 
 class ViewManagerAnalog(ViewManager):
