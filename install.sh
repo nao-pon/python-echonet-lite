@@ -1,5 +1,5 @@
-sudo apt -y install python-dev python-pip python3-pip libfreetype6-dev libjpeg-dev build-essential libopenjp2-7 libtiff5 nginx uwsgi-plugin-python3
-pip3 install luma.core luma.oled netifaces gpiozero bitstring
+sudo apt -y install python-dev python-pip python3-pip libfreetype6-dev libjpeg-dev build-essential libopenjp2-7 libtiff5 nginx uwsgi-plugin-python3 libatlas-base-dev
+pip3 install luma.core luma.oled netifaces gpiozero bitstring numpy
 pip3 install git+https://github.com/katsumin/luma.lcd.git@feature/st7789
 sudo -H pip3 install flask
 ls ./nginx/log >/dev/null 2>&1
