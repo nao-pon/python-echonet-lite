@@ -22,12 +22,17 @@
 ## インストール
 
 -   環境設定
-
-    -   SPI、シリアルを有効にする
-
     ```
     pi@raspberrypi:~ $ sudo raspi-config
     ```
+    - 3 Interface Options (SPI, ハードウェアシリアルを有効にする)
+        - I4 SPI
+            - Would you like the SPI interface to be enabled? -> Yes
+        - I6 Serial Port
+            - Would you like a login shell to be accessible over serial? -> No
+            - Would you like the serial port hardware to be enabled? -> Yes
+    - 5 Localisation Options (タイムゾーンをTokyoにする)
+        - L2 Timezone
 
 -   ソース取得
 
@@ -35,7 +40,7 @@
     pi@raspberrypi:~ $ sudo apt update
     pi@raspberrypi:~ $ sudo apt upgrade
     pi@raspberrypi:~ $ sudo apt -y install git
-    pi@raspberrypi:~ $ git clone -b wisun-gateway https://github.com/katsumin/python-echonet-lite wisun-gateway
+    pi@raspberrypi:~ $ git clone -b wisun-gateway https://github.com/nao-pon/python-echonet-lite wisun-gateway
     ```
 
 -   インストール
@@ -65,6 +70,8 @@
     1. ブラウザで「http://<IP アドレス>:9000」にアクセスして、Ｂルートパスワード・ＢルートＩＤ・シリアルデバイス名を設定する。
 
         ![](web-config.png)
+
+- ST7789 ディスプレイを使用時は config.ini の SSD1331 パートをコメントアウトして、ST7789 パートのコメントアウトを外す。
 
 ## 回路図
 
