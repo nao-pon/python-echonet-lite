@@ -21,7 +21,7 @@
 
 ## インストール
 
-- Raspberry Pi OS Lite (32bit)
+- Raspberry Pi OS Lite (32bit) 動作確認は Raspberry Pi Zero WH 上で実行
     - 動作確認時のバージョン -> [September 22nd 2022](https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-26/2022-09-22-raspios-bullseye-armhf-lite.img.xz)
     - SDカードの Boot パーティションの設定
         - ssh の有効化
