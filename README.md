@@ -23,8 +23,33 @@
 
 - Raspberry Pi OS Lite (32bit)
     - 動作確認時のバージョン -> [September 22nd 2022](https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-26/2022-09-22-raspios-bullseye-armhf-lite.img.xz)
+    - SDカードの Boot パーティションの設定
+        - ssh の有効化
+            - ファイル名 `ssh` で空ファイルを作成
+        - WiFi 設定
+            - ファイル名 `wpa_supplicant.conf` を作成
+                ```
+                ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+                update_config=1
+                country=JP
 
--   環境設定
+                network={
+                 ssid="あなたのSSID"
+                 psk="あなたのパスワード"
+                }
+                ```
+        - pi ユーザーの作成
+            - パスワードハッシュの作成
+                - 手持ちの Linux シェルで以下を実行 (-6 は -5, -1, なし も可)
+                    ```
+                    openssl passwd -6 設定するパスワード
+                    ```
+            - ファイル名 `userconf` を作成
+                ```
+                pi:作成したパスワードハッシュ
+                ```
+
+-   環境設定 (ネットワーク越しにSSHログインできる)
     ```
     pi@raspberrypi:~ $ sudo raspi-config
     ```
