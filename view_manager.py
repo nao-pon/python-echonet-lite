@@ -122,9 +122,11 @@ class ViewManager(metaclass=ABCMeta):
     def set_display_state(self, state):
         self._state = state
         if self._state:
+            self._device.backlight(True)
             self._device.show()
         else:
             self._device.hide()
+            self._device.backlight(False)
 
     # 表示状態取得
     def get_display_state(self):
