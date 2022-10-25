@@ -1,1 +1,5 @@
 .DS_Store
+config.ini
+*.bak
+__pycache__
+nginx/log
