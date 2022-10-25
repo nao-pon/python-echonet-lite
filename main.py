@@ -71,6 +71,10 @@ def main():
 
     vm = vmi
     pre_state = connect_state
+
+    # 電源投入時にWi-SUN自動接続
+    startConnect()
+    
     while True:
         if bd.isPressed(SW4):
             state = vm.get_display_state()
@@ -99,11 +103,14 @@ def main():
             vm = vmi
         if pre_state != connect_state:
             vm.clearPayload()
+            if connect_state == ConnectState.CONNECTED:
+                vm.set_display_state(False)
         vm.reflesh()
         pre_state = connect_state
 
         if bd.isLongPressed(POWER):
             logger.info("pressed")
+            vm.set_display_state(True)
             vmi.setInfo('シャットダウン中', int(iniFile.get('view', 'font_small')))
             vm = vmi
             vm.clearPayload()
