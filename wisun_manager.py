@@ -141,16 +141,27 @@ class WisunManager(metaclass=ABCMeta):
     # WiSUN送信タスク
     def _sndTask(self, queue):
         logger.info('send task start')
+        # 15秒間隔
         req = Frame(bytearray([0x10, 0x81, 0x00, 0x01, 0x05, 0xff,
                                0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
+        # 15分に1回
+        req60 = Frame(bytearray([0x10, 0x81, 0x00, 0x01, 0x05, 0xff,
+                               0x01, 0x02, 0x88, 0x01, 0x62, 0x04,
+                               0xe0, 0x00, 0xe3, 0x00, 0xe7, 0x00, 0xe8, 0x00]))
+        cnt = 0
         while not self._stopSendEvent.wait(15.0):
             if self._sendPause:
                 continue
+            cnt += 1
             try:
                 frame = queue.get_nowait()
                 self.wisunSendFrame(frame)
             except Empty:
-                self.wisunSendFrame(req)
+                if cnt > 60:
+                    cnt = 0
+                    self.wisunSendFrame(req60)
+                else:
+                    self.wisunSendFrame(req)
         logger.info('send task end')
 
     # 送信一時停止
