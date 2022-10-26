@@ -1,23 +1,20 @@
-# Wi-SUN Gateway
+# Wi-SUN Gateway for Home Assistant
 
 ## 概要
 
 Ｂルート接続されたスマートメータとの Wi-SUN 通信を、 Ethernet 通信に変換するものです。
 
+このリポジトリのバージョンは、Home Assistant のカスタムコンポーネント [echonetlite_homeassistant](https://github.com/scottyphillips/echonetlite_homeassistant) で動作するように調整が加えられています。
+
 ## 変更点
 
--   本プロダクトは、Keisuke Minami 氏の[python-echonet-lite](https://github.com/kminami/python-echonet-lite)を流用しています。
--   変更点は以下の通りです。
-    -   Frame クラス
-        -   get_key()メソッドの追加
-    -   Node クラス
-        -   socket オブジェクトをローカル変数からインスタンス変数に変更
-        -   \_deliver()メソッドと service()メソッドの引数に通信相手の IP アドレスを追加
-        -   sendto()メソッドの追加
-        -   bind 失敗時のリトライを追加
-    -   Property クラス
-        -   EDT 値の取り出し位置を修正
-        -   Node オブジェクトの保持と getter／setter の追加
+- 本プロダクトは、katsumin 氏の[python-echonet-lite](https://github.com/katsumin/python-echonet-lite)から派生しています。
+- 変更点は以下の通りです。
+    - 起動時に自動接続するようになっています。
+    - 接続完了後に、必須プロパティ(メーカーコード、積算電力量単位)の取得を行います。
+    - その後、データが取得できたら画面をOFFにします。
+    - 画面OFF時は、バックライトも消灯します。
+    - Home Assistant でセットアップする場合は、画面が消えてからセットアップをするとスムーズです。
 
 ## インストール
 
@@ -109,8 +106,10 @@
 
 Copyright 2014 Keisuke Minami
 Copyright 2019 katsumin
+Copyright 2022 Naoki Sawada
 
 Apache License 2.0
 
-[echonet lite]: http://www.echonet.gr.jp/ "ECHONET Lite"
-[kadecot]: http://kadecot.net/ "Kadecot"
+[echonet lite]: https://echonet.jp/ "ECHONET Lite"
+[kadecot]: [https://kadecot.net/](https://web.archive.org/web/20170607015901/https://kadecot.net/) "Kadecot"
+
