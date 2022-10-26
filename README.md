@@ -2,7 +2,7 @@
 
 ## 概要
 
-Ｂルート接続されたスマートメータとの Wi-SUN 通信を、 Ethernet 通信に変換するものです。
+Ｂルート接続されたスマートメータとの Wi-SUN 通信を、 Ethernet または WiFi 通信に変換するものです。
 
 このリポジトリのバージョンは、Home Assistant のカスタムコンポーネント [echonetlite_homeassistant](https://github.com/scottyphillips/echonetlite_homeassistant) で動作するように調整が加えられています。
 
