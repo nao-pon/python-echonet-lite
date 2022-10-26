@@ -105,11 +105,14 @@
 ## License
 
 Copyright 2014 Keisuke Minami
+
 Copyright 2019 katsumin
+
 Copyright 2022 Naoki Sawada
 
 Apache License 2.0
 
-[echonet lite]: https://echonet.jp/ "ECHONET Lite"
-[kadecot]: [https://kadecot.net/](https://web.archive.org/web/20170607015901/https://kadecot.net/) "Kadecot"
+[echonet lite: https://echonet.jp/](https://echonet.jp/) "ECHONET Lite"
+
+[kadecot: https://kadecot.net/](https://web.archive.org/web/20170607015901/https://kadecot.net/) "Kadecot"
 
