@@ -42,6 +42,7 @@ class WisunManager(metaclass=ABCMeta):
             self._queueSend = None
             self._propMan = None
             self._sendPause = False
+            self._initReq = False
 
     # シリアル送信
     def _serialSendLine(self, str):
@@ -141,6 +142,21 @@ class WisunManager(metaclass=ABCMeta):
     # WiSUN送信タスク
     def _sndTask(self, queue):
         logger.info('send task start')
+        # initReq 指定プロパティキャッシュしておくため
+        # 一度に複数のプロパティを取得すると不安定になる模様なので最低限に絞ってある
+        reqInit = Frame(bytearray(
+            [
+                0x10, 0x81, 0x00, 0x01, 0x05, 0xff,
+                0x01, 0x02, 0x88, 0x01, 0x62,
+                0x03,       # プロパティ数を設定
+                #0x80, 0x00, # 動作状態
+                0xD3, 0x00, # 係数
+                0xE1, 0x00, # 積算電力量単位（正方向、逆方向計測値）
+                0x8A, 0x00, # メーカーコード
+                #0x9D, 0x00, # 状変アナウンスプロパティマップ
+                #0x9E, 0x00, # Set プロパティマップ
+                #0x9F, 0x00  # Get プロパティマップ
+            ]))
         # 15秒間隔
         req = Frame(bytearray([0x10, 0x81, 0x00, 0x01, 0x05, 0xff,
                                0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
@@ -157,11 +173,14 @@ class WisunManager(metaclass=ABCMeta):
                 frame = queue.get_nowait()
                 self.wisunSendFrame(frame)
             except Empty:
-                if cnt > 60:
-                    cnt = 0
-                    self.wisunSendFrame(req60)
+                if self._initReq:
+                    self.wisunSendFrame(reqInit)
                 else:
-                    self.wisunSendFrame(req)
+                    if cnt > 60:
+                        cnt = 0
+                        self.wisunSendFrame(req60)
+                    else:
+                        self.wisunSendFrame(req)
         logger.info('send task end')
 
     # 送信一時停止

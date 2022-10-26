@@ -47,8 +47,11 @@ class ConnectState(Enum):
     DISCONNECT = 0
     CONNECTING = 1
     CONNECTED = 2
-    CONNECT_ERROR = 3
-    DEVICE_ERROR = 4
+    INITIALIZING = 3
+    ACQUIRING = 4
+    READY = 5
+    CONNECT_ERROR = 6
+    DEVICE_ERROR = 7
 
 
 thread = None
@@ -72,38 +75,64 @@ def main():
     vm = vmi
     pre_state = connect_state
 
+    # 初期リクエストフラグ
+    initReq = True
+
     # 電源投入時にWi-SUN自動接続
     startConnect()
-    
+
     while True:
+        _conState = connect_state
         if bd.isPressed(SW4):
             state = vm.get_display_state()
             vm.set_display_state(not state)
-        if connect_state == ConnectState.CONNECTED:
+
+        if _conState == ConnectState.CONNECTED:
+                # Wi-SUN manager の初期リクエストフラグ設定
+                wm._initReq = True
+                _conState = connect_state = ConnectState.INITIALIZING
+        if _conState == ConnectState.INITIALIZING:
+            vmi.setInfo('初期化中', int(iniFile.get('view', 'font_info')))
+            # 初期リクエストでメーカーコードがキャッシュされるのを待つ
+            unit = pm._cache.get(0xe1)  # 積算電力量単位（正方向、逆方向計測値）
+            mcode = pm._cache.get(0x8a) # メーカーコード
+            if unit is not None and mcode is not None:
+                if len(mcode.EDT):
+                    # echonet_lite/__init__.py の Node _mcode プロパティへ設定
+                    em._node._mcode = mcode.EDT
+                if len(unit.EDT): # 積算電力量単位は必須
+                    wm._initReq = False
+                    _conState = connect_state = ConnectState.ACQUIRING
+        if _conState == ConnectState.ACQUIRING:
+            vmi.setInfo('取得中', int(iniFile.get('view', 'font_info')))
+            if pm._cache.get(0xe7) is not None:
+                _conState = connect_state = ConnectState.READY
+
+        if _conState == ConnectState.READY:
             if bd.isPressed(SW3):
                 # スマートメータ切断
                 if wm is not None:
                     wm.disconnect()
-                    connect_state = ConnectState.DISCONNECT
-        elif connect_state == ConnectState.DISCONNECT:
+                    _conState = connect_state = ConnectState.DISCONNECT
+        elif _conState == ConnectState.DISCONNECT:
             vmi.setInfo('未接続', int(iniFile.get('view', 'font_info')))
             if bd.isPressed(SW2) and thread is None:
                 startConnect()
-        elif connect_state == ConnectState.CONNECTING:
+        elif _conState == ConnectState.CONNECTING:
             vmi.setInfo('接続中', int(iniFile.get('view', 'font_info')))
-        elif connect_state == ConnectState.CONNECT_ERROR:
+        elif _conState == ConnectState.CONNECT_ERROR:
             vmi.setInfo('接続失敗', int(iniFile.get('view', 'font_info')))
             if bd.isPressed(SW2) and thread is None:
                 startConnect()
-        elif connect_state == ConnectState.DEVICE_ERROR:
+        elif _conState == ConnectState.DEVICE_ERROR:
             vmi.setInfo('無線モジュール異常', int(iniFile.get('view', 'font_small')))
-        if connect_state == ConnectState.CONNECTED:
+        if _conState == ConnectState.READY:
             vm = vmp
         else:
             vm = vmi
-        if pre_state != connect_state:
+        if pre_state != _conState:
             vm.clearPayload()
-            if connect_state == ConnectState.CONNECTED:
+            if _conState == ConnectState.READY:
                 vm.set_display_state(False)
         vm.reflesh()
         pre_state = connect_state

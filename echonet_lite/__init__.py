@@ -180,6 +180,7 @@ class Node:
     def __init__(self):
         self.objects = {}
         self._sock = self._bind_socket()
+        self._mcode = b'\xff\xff\xff'
 
     def add_object(self, obj):
         if obj.group not in self.objects:
@@ -211,6 +212,10 @@ class Node:
                 if prop.EPC == 0xd6:  # instance list
                     new_frame.properties.append(
                         self._create_object_list_property())
+                elif prop.EPC == 0x83: # UID (Not supported)
+                    new_frame.properties.append(Property([0x83, b'']))
+                elif prop.EPC == 0x8a: # MANUFACTURER
+                    new_frame.properties.append(Property([0x8a, self._mcode]))
             return new_frame
 
     def _create_object_list_property(self):
