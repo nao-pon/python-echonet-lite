@@ -82,7 +82,7 @@
 -   下記のいずれかの方法で設定する
     1. config.ini を直接編集
         - pwd…Ｂルートパスワード
-        - bid…ＢルートＩＤ
+        - bid…ＢルートＩＤ (ハイフンは含めない)
         - serial_port…Wi-SUN モジュールが接続されているシリアルデバイス名
 
 
@@ -97,6 +97,17 @@
         ![](web-config.png)
 
 - ST7789 ディスプレイを使用時は config.ini の SSD1331 パートをコメントアウトして、ST7789 パートのコメントアウトを外す。
+
+## ハードウェア
+
+Wi-SUN モジュールと Raspberry-pi を接続するアダプターは、スイッチサイエンスで購入可能ですが、在庫はあまりないようです。
+
+- [Wi-SUNゲートウェイキット（RpiWi-001）](https://www.switch-science.com/collections/all/products/6160)
+- [Wi-SUNゲートウェイキット（最小コスト版、OLEDタイプ）](https://www.switch-science.com/collections/all/products/6467)
+- [Wi-SUNゲートウェイキット（最小コスト版、LCDタイプ）](https://www.switch-science.com/collections/all/products/6466)
+
+
+下記の回路図を参考に自作することも可能だと思います。
 
 ## 回路図
 
