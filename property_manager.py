@@ -80,6 +80,9 @@ class PropertyManager:
         # 対象ならキャッシュ
         props = {}
         for p in frame.properties:
+            if p.EPC == 0x9d:
+                # 通知マップに wisun_manager の 15s/15m 毎のリクエストのプロパティを追加
+                p.EDT += b'\xE0\xE3\xE7\xE8'
             props[p.EPC] = p
             # if p.EPC in PropertyManager.cacheEPCs:
             #     self._cache[p.EPC] = p
@@ -102,6 +105,10 @@ class PropertyManager:
                         res_frame.properties.append(props[p.EPC])
                 # Ethernet response
                 self._ether.sendResponse(res_frame, key)
+            else:
+                # wisun_manager の 15s/15m 毎のリクエストのレスポンスを通知に変更して送信
+                frame.ESV = 0x73
+                self._ether.sendNotification(frame)
         elif frame.ESV in PropertyManager.infESVs:
             self._ether.sendNotification(frame)
 
