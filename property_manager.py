@@ -82,7 +82,11 @@ class PropertyManager:
         for p in frame.properties:
             if p.EPC == 0x9d:
                 # 通知マップに wisun_manager の 15s/15m 毎のリクエストのプロパティを追加
-                p.EDT += b'\xE0\xE3\xE7\xE8'
+                arr = list(bytearray(p.EDT[1::]))
+                arr.extend([0xE0, 0xE3, 0xE7, 0xE8])
+                p.EDT = bytes(set(arr))
+                p.EDT = len(p.EDT).to_bytes(1, 'big') + p.EDT
+
             props[p.EPC] = p
             # if p.EPC in PropertyManager.cacheEPCs:
             #     self._cache[p.EPC] = p
