@@ -113,6 +113,30 @@ Wi-SUN モジュールと Raspberry-pi を接続するアダプターは、ス�
 
 ![](schematic.png)
 
+
+## Home Assistant
+
+Home Assistant において、ECHONET Lite 統合を通して利用できます。
+
+ECHONET Lite 統合をインストールして、「設定」-「統合」-「統合を追加」で ECHONET Lite を選択します。
+
+![Wi-SUN-Ethernet-1](https://user-images.githubusercontent.com/1412630/199409452-7129f9a6-0f84-4de0-a04e-d3354e1d1796.png)
+
+このプロダクトが正常に機能していると、「送信(Submit)」をクリックして少し待つと、自動的に検出されます。
+
+![Wi-SUN-Ethernet-2](https://user-images.githubusercontent.com/1412630/199409820-524072a1-f7b7-4c7c-a843-b7d35936ec91.png)
+
+更に進めると、Low voltage smart electric energy meter と Display の2つのデバイスが認識されます。
+Display デバイスは、このプロダクトのディスプレイの On / Off をコントロールできます。
+
+![Wi-SUN-Ethernet-3](https://user-images.githubusercontent.com/1412630/199410408-d381ee93-144a-40fa-ab95-6e4f9ddb8684.png)
+![Wi-SUN-Ethernet-4](https://user-images.githubusercontent.com/1412630/199410487-aeed3935-ab6d-43cc-b712-09f0a1659dcc.png)
+
+これで以下のように Home Assistant 上でデバイスを利用できるようになります。
+
+![Wi-SUN-Ethernet-5](https://user-images.githubusercontent.com/1412630/199410657-d089d043-df94-43f4-9732-7bd3680988e7.png)
+![Wi-SUN-Ethernet-6](https://user-images.githubusercontent.com/1412630/199410673-fd0b4c96-1f78-4d92-bed3-e56f1ae5ba9e.png)
+
 ## License
 
 Copyright 2014 Keisuke Minami
