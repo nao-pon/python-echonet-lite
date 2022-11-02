@@ -2,6 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from gpiozero import LED
 import serial
+import time
 from time import sleep
 from threading import Event, Thread
 from echonet_lite import Object, Frame, Node, Property
@@ -43,6 +44,7 @@ class WisunManager(metaclass=ABCMeta):
             self._propMan = None
             self._sendPause = False
             self._initReq = False
+            self._lastPutTime = None
 
     # シリアル送信
     def _serialSendLine(self, str):
@@ -100,6 +102,7 @@ class WisunManager(metaclass=ABCMeta):
     # Propertyマネージャへ受信フレームを設定
     def putProperty(self, frame):
         if self._propMan is not None:
+            self._lastPutTime = time.time()
             keys = frame.get_key()
             self._propMan.put(frame, keys)
 
@@ -133,6 +136,7 @@ class WisunManager(metaclass=ABCMeta):
 
     # 送信タスク終了
     def stopSendTask(self):
+        self._lastPutTime = None
         if self._sndThread is None:
             return
         self._stopSendEvent.set()
@@ -164,11 +168,11 @@ class WisunManager(metaclass=ABCMeta):
         req60 = Frame(bytearray([0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
                                0x01, 0x02, 0x88, 0x01, 0x62, 0x04,
                                0xe0, 0x00, 0xe3, 0x00, 0xe7, 0x00, 0xe8, 0x00]))
-        cnt = 0
+        cnt = -1
         while not self._stopSendEvent.wait(15.0):
+            cnt += 1
             if self._sendPause:
                 continue
-            cnt += 1
             try:
                 frame = queue.get_nowait()
                 self.wisunSendFrame(frame)
@@ -176,7 +180,7 @@ class WisunManager(metaclass=ABCMeta):
                 if self._initReq:
                     self.wisunSendFrame(reqInit)
                 else:
-                    if cnt > 60:
+                    if cnt == 0 or cnt > 60:
                         cnt = 0
                         self.wisunSendFrame(req60)
                     else:

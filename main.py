@@ -3,6 +3,7 @@ from echonet_lite import Node
 from wisun_manager_factory import WisunManagerFactory
 from ethernet_manager import EthernetManager
 from property_manager import PropertyManager
+from display_manager import DisplayManager
 from logging import getLogger, StreamHandler, INFO, Formatter, DEBUG
 import time
 from btn_drv import ButtonDriver, POWER, SW2, SW3, SW4
@@ -37,11 +38,13 @@ em = EthernetManager()
 pm = PropertyManager()
 pm.setWisunManager(wm)
 pm.setEthernetManager(em)
+# Display Manager
+dm = DisplayManager()
+dm.setEthernetManager(em)
 # Viewマネージャ
 vmi = ViewManagerInfo(iniFile)
 vmp = ViewManagerPower(iniFile)
 vmp.setPropertyManager(pm)
-
 
 class ConnectState(Enum):
     DISCONNECT = 0
@@ -71,18 +74,23 @@ def main():
 
     # EthernetベースのEchonet処理開始
     em.start()
+    while em._node is None:
+        time.sleep(0.1)
+    em._node.add_object(dm)
 
     vm = vmi
+    dm.setViewManager(vm)
     pre_state = connect_state
-
-    # 初期リクエストフラグ
-    initReq = True
 
     # 電源投入時にWi-SUN自動接続
     startConnect()
 
     while True:
         _conState = connect_state
+        if wm is not None and wm._lastPutTime is not None and wm._lastPutTime + 300 < time.time():
+            wm.disconnect()
+            startConnect()
+            _conState = connect_state
         if bd.isPressed(SW4):
             state = vm.get_display_state()
             vm.set_display_state(not state)
@@ -130,6 +138,7 @@ def main():
             vm = vmp
         else:
             vm = vmi
+        dm.setViewManager(vm)
         if pre_state != _conState:
             vm.clearPayload()
             if _conState == ConnectState.READY:

@@ -18,15 +18,16 @@ class ViewManager(metaclass=ABCMeta):
 
     # 初期化
     def __init__(self, iniFile):
-        self._state = True
         self._device = self.get_device(
             ['--config', iniFile.get('view', 'config_file')])
+        self._device._state = True
         self._width = min(self._device.width, 240)
         self._height = min(self._device.height, 240)
         self._font = self.make_font(iniFile.get(
             'view', 'header_font'), int(iniFile.get('view', 'font_small')))
         self._date = None
         self._pm = None
+        self._dm = None
         with canvas(self._device) as draw:
             text_w, text_h = draw.textsize('t', self._font)
             self._payloadArea = (0, text_h, self._width -
@@ -36,6 +37,12 @@ class ViewManager(metaclass=ABCMeta):
     def setPropertyManager(self, pm):
         self._pm = pm
 
+    # Displayマネージャー設定
+    def setDisplayManager(self, dm):
+        if self._dm is None:
+            dm.notify(self._device._state)
+        self._dm = dm
+
     # フォント生成
     def make_font(self, name, size):
         font_path = os.path.abspath(os.path.join(
@@ -44,6 +51,9 @@ class ViewManager(metaclass=ABCMeta):
 
     # 表示更新
     def reflesh(self):
+        if not self._device._state:
+            # ディスプレイOFF時は必要ない
+            return
         with canvas(self._device) as draw:
             # 外枠
             # draw.rectangle((0, 0, self._width - 1, self._height - 1), outline="blue")
@@ -120,17 +130,23 @@ class ViewManager(metaclass=ABCMeta):
 
     # 表示状態設定
     def set_display_state(self, state):
-        self._state = state
-        if self._state:
+        if state:
             self._device.backlight(True)
             self._device.show()
+            self._device._state = True
+            if self._dm is not None:
+                self._dm.notify(True)
         else:
+            self._device._state = False
+            time.sleep(0.2) # 表示中に落とすと以後の表示ができなくなる模様？なので待つ
             self._device.hide()
             self._device.backlight(False)
+            if self._dm is not None:
+                self._dm.notify(False)
 
     # 表示状態取得
     def get_display_state(self):
-        return self._state
+        return self._device._state
 
 
 class ViewManagerAnalog(ViewManager):
