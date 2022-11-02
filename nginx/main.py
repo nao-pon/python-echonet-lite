@@ -31,7 +31,15 @@ def register():
             iniFile.write(fp)
         # wisun-gateway/main.py再起動
         os.system('sudo systemctl restart sample.service')
-        res = "config.iniを更新しました"
+        res = "config.ini を更新しました"
+    return res
+
+
+@app.route('/restart', methods=['GET'])
+def restart():
+    # wisun-gateway/main.py再起動
+    os.system('sudo systemctl restart sample.service')
+    res = "sample.service をリスタートしました"
     return res
 
 
