@@ -164,8 +164,8 @@ class WisunManager(metaclass=ABCMeta):
         # 15秒間隔
         req = Frame(bytearray([0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
                                0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
-        # 15分に1回
-        req60 = Frame(bytearray([0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
+        # 10分に1回
+        req40 = Frame(bytearray([0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
                                0x01, 0x02, 0x88, 0x01, 0x62, 0x04,
                                0xe0, 0x00, 0xe3, 0x00, 0xe7, 0x00, 0xe8, 0x00]))
         cnt = -1
@@ -180,9 +180,9 @@ class WisunManager(metaclass=ABCMeta):
                 if self._initReq:
                     self.wisunSendFrame(reqInit)
                 else:
-                    if cnt == 0 or cnt > 60:
+                    if cnt == 0 or cnt > 40:
                         cnt = 0
-                        self.wisunSendFrame(req60)
+                        self.wisunSendFrame(req40)
                     else:
                         self.wisunSendFrame(req)
         logger.info('send task end')
