@@ -138,7 +138,7 @@ class ViewManager(metaclass=ABCMeta):
                 self._dm.notify(True)
         else:
             self._device._state = False
-            time.sleep(0.2) # 表示中に落とすと以後の表示ができなくなる模様？なので待つ
+            time.sleep(0.3) # 表示中に落とすと以後の表示ができなくなる模様？なので待つ
             self._device.hide()
             self._device.backlight(False)
             if self._dm is not None:
