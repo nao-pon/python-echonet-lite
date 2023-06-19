@@ -6,6 +6,8 @@ RUN apk add --no-cache python3 alpine-sdk git linux-headers python3-dev py3-pip 
                                git+https://github.com/katsumin/luma.lcd.git@feature/st7789 && \
     apk del --purge alpine-sdk git linux-headers python3-dev py3-pip zlib-dev freetype-dev jpeg-dev tiff-dev openjpeg-dev
 
+RUN apk add --no-cache libjpeg-turbo openjpeg tiff
+
 RUN mkdir -p /home/pi/wisun-gateway/
 
 WORKDIR /home/pi/wisun-gateway/
