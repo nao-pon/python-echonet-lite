@@ -1,5 +1,4 @@
 # coding: utf-8
-from gpiozero import LED
 from threading import Event, Thread
 from echonet_lite import Object, Frame, Node, Property
 import serial

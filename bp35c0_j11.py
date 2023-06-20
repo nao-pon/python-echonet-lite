@@ -430,7 +430,6 @@ class WisunManager(WisunManager):
             self._connected = True
         except ComError as err:
             logger.warning('{0} error'.format(err))
-            self.reset()
         finally:
             return self._connected
 
@@ -452,11 +451,9 @@ class WisunManager(WisunManager):
             if not self._stopBroute():
                 raise ComError('B route Stop')
             # HWリセット
-            self.reset()
             sleep(3.0)
         except ComError as err:
             logger.warning('{0} error'.format(err))
-            self.reset()
             return
         finally:
             self._connected = False
@@ -466,8 +463,6 @@ if __name__ == '__main__':
     wm = None
     try:
         wm = WisunManager()
-        wm.reset()
-
         while True:
             sleep(1)
     except KeyboardInterrupt:

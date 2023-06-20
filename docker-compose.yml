@@ -9,23 +9,5 @@ services:
       - .:/home/pi/wisun-gateway/
     devices:
       - "/dev/ttyAMA0:/dev/ttyAMA0"
-      - "/dev/gpiomem:/dev/gpiomem"
-  # nginx:
-  #   image: nginx:latest
-  #   ports:
-  #     - "9000:9000"
-  #   volumes:
-  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-  #     - socket:/home/pi/wisun-gateway/nginx/tmp
-  # web:
-  #   build:
-  #     context: ./
-  #     dockerfile: web.dockerfile
-  #   volumes:
-  #     - .:/home/pi/wisun-gateway/
-  #     - ./nginx/log:/home/pi/wisun-gateway/nginx/log/
-  #     - socket:/home/pi/wisun-gateway/nginx/tmp
-  #   command: uwsgi --ini /home/pi/wisun-gateway/nginx/uwsgi.ini
-  #
-# volumes:
-#   socket:
+    ports:
+      - "3610:3610/udp"

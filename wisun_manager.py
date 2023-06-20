@@ -1,6 +1,5 @@
 # coding: utf-8
 from abc import ABCMeta, abstractmethod
-from gpiozero import LED
 import serial
 import time
 from time import sleep
@@ -33,9 +32,6 @@ class WisunManager(metaclass=ABCMeta):
             logger.error('Serial port Error')
             self._ser = None
         finally:
-            # reset
-            self._reset = LED(18, False)
-            self.reset()
             # 受信タスク開始
             self.startReceiveTask()
             # 送信タスク用リソース
@@ -78,20 +74,11 @@ class WisunManager(metaclass=ABCMeta):
             return b''
         return self._ser.read(size)
 
-    # H/Wリセット
-    def reset(self):
-        logger.info('reset()')
-        self._reset.on()
-        sleep(0.5)
-        self._reset.off()
-        sleep(0.5)
-
     # 終了処理
     def dispose(self):
         logger.info('dispose')
         self.stopSendTask()
         self.stopReceiveTask()
-        self._reset.close()
         if self._ser is not None:
             self._ser.close()
 
