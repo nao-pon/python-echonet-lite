@@ -2,6 +2,7 @@
 
 ## Changes
 
+- BP35A1に対応
 - Docker化
 - WebUIの削除
 - Display、ボタン等Wi-SUNアダプタ以外のHWの削除
