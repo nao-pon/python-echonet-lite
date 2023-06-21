@@ -5,6 +5,8 @@ services:
       context: ./
       dockerfile: echonet.dockerfile
     command: python3 /home/pi/wisun-gateway/main.py
+    environment:
+      - TZ=JST-9
     volumes:
       - .:/home/pi/wisun-gateway/
     devices:
