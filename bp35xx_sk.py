@@ -12,15 +12,23 @@ logger = getLogger(__name__)
 
 
 class WisunManager(WisunManager):
+    scan_cmd_c0 = "SKSCAN 2 FFFFFFFF 6 0\r\n"
+    scan_cmd_a1 = "SKSCAN 2 FFFFFFFF 6\r\n"
+    sendto_cmd_c0 = "SKSENDTO 1 {0} 0E1A 1 0 {1:04X} "
+    sendto_cmd_a1 = "SKSENDTO 1 {0} 0E1A 1 {1:04X} "
+
     def __init__(self, pwd, bid, ser):
         super().__init__(pwd, bid, ser)
         self._connected = False
+        self._scan_cmd = self.scan_cmd_c0
+        self._sendto_cmd = self.sendto_cmd_c0
 
     # モジュール有効状態チェック
     def isActive(self):
         return self._sendAndWaitOk(b"SKVER\r\n")
 
     def _sendAndWaitOk(self, statement):
+        logger.info('send -> {0}'.format(statement))
         if self._serialSendLine(statement) is False:
             return False
         return self._waitOk(statement)
@@ -58,18 +66,19 @@ class WisunManager(WisunManager):
             if line == b'':
                 # timeout
                 continue
-            logger.info(line)
+            logger.info('recv <- {0}'.format(line))
             if line.startswith(b'ERXUDP'):
                 cols = line.split(b' ')
                 port = int(cols[4], 16)
                 if port == 3610:
                     # echonet lite frame
-                    len = int(cols[8], 16)
-                    # bar = bytearray(cols[9][0:len])
-                    bar = bytearray(binascii.a2b_hex(cols[9][0:len * 2]))
-                    # logger.info(bar)
+                    if len(cols) > 9 :
+                        length = int(cols[8], 16)
+                        bar = bytearray(binascii.a2b_hex(cols[9][0:length * 2]))
+                    else:
+                        length = int(cols[7], 16)
+                        bar = bytearray(binascii.a2b_hex(cols[8][0:length * 2]))
                     frame = Frame(bar)
-                    # logger.info(frame)
                     self.putProperty(frame)
             elif line.startswith(b'EVENT 29'):
                 self.sendPause(True)
@@ -89,8 +98,7 @@ class WisunManager(WisunManager):
         if self._ipv6Addr is not None:
             # print('send: {0}'.format(frame))
             payload = frame.get_bytes()
-            command = "SKSENDTO 1 {0} 0E1A 1 0 {1:04X} ".format(
-                self._ipv6Addr, len(payload))
+            command = self._sendto_cmd.format(self._ipv6Addr, len(payload))
             self._serialSendLine(command.encode())
             self._serialSendLine(payload)
             self._serialSendLine(b'\r\n')
@@ -140,7 +148,12 @@ class WisunManager(WisunManager):
         scanRes = {}
         flag = True
         while flag:
-            self._sendAndWaitOk(b"SKSCAN 2 FFFFFFFF 6 0\r\n")
+            if self._sendAndWaitOk(self._scan_cmd.encode('utf-8')) == False:
+                logger.info('switch BP35A1 mode')
+                self._scan_cmd = self.scan_cmd_a1
+                self._sendto_cmd = self.sendto_cmd_a1
+                continue
+
             start = time.time()
             while True:
                 # line = self._serialReceiveLine()
