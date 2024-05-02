@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+import os
 import bp35xx_sk
 import bp35c0_j11
 import logging
@@ -12,7 +13,7 @@ class WisunManagerFactory:
     def createInstance():
         # config読み込み
         iniFile = ConfigParser()
-        iniFile.read("/home/debian/python-echonet-lite-docker/config.ini")
+        iniFile.read(os.path.dirname(__file__) + "/config.ini")
         pwd = iniFile.get("smartmeter", "pwd")
         bid = iniFile.get("smartmeter", "bid")
         dev = iniFile.get("smartmeter", "serial_port")

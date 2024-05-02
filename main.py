@@ -8,7 +8,6 @@ from enum import Enum
 from threading import Thread
 import signal
 import sys
-from configparser import ConfigParser
 
 # ログの設定
 handler = StreamHandler()
@@ -19,10 +18,6 @@ handler.setFormatter(
 logger = getLogger()
 logger.addHandler(handler)
 logger.setLevel(INFO)
-
-# config
-iniFile = ConfigParser()
-iniFile.read("/home/debian/python-echonet-lite-docker/config.ini")
 
 # Wi-SUNマネージャ
 wm = WisunManagerFactory.createInstance()
