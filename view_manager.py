@@ -95,6 +95,7 @@ class ViewManager(metaclass=ABCMeta):
 
     # ペイロード表示のクリア
     def clearPayload(self):
+        self._device.clear()
         with canvas(self._device) as draw:
             draw.rectangle((self._payloadArea[0], self._payloadArea[1],
                             self._payloadArea[2], self._payloadArea[3]), fill="black", outline="black")
@@ -131,15 +132,17 @@ class ViewManager(metaclass=ABCMeta):
     # 表示状態設定
     def set_display_state(self, state):
         if state:
+            self.clearPayload()
+            self.reflesh()
+            #self._device.show()
             self._device.backlight(True)
-            self._device.show()
             self._device._state = True
             if self._dm is not None:
                 self._dm.notify(True)
         else:
             self._device._state = False
             time.sleep(0.3) # 表示中に落とすと以後の表示ができなくなる模様？なので待つ
-            self._device.hide()
+            #self._device.hide()
             self._device.backlight(False)
             if self._dm is not None:
                 self._dm.notify(False)

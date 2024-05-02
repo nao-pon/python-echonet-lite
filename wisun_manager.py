@@ -9,11 +9,13 @@ from echonet_lite import Object, Frame, Node, Property
 from queue import Queue, Empty
 from set_queue import SetQueue
 from logging import getLogger, StreamHandler, INFO, Formatter
+
 logger = getLogger(__name__)
 
 
 class ComError(Exception):
     pass
+
 
 # Wi-SUNマネージャ基底クラス
 
@@ -30,7 +32,7 @@ class WisunManager(metaclass=ABCMeta):
             self._ser.timeout = 5.0
             self._ser.write_timeout = 2.0
         except serial.SerialException:
-            logger.error('Serial port Error')
+            logger.error("Serial port Error")
             self._ser = None
         finally:
             # reset
@@ -58,16 +60,16 @@ class WisunManager(metaclass=ABCMeta):
 
     # シリアル受信（\rをデリミタとし、\nは読み飛ばす）
     def _serialReceiveLine(self):
-        s = b''
+        s = b""
         if self._ser is None:
             sleep(1)
             return s
         # return self._ser.readline()
         while True:
             c = self._ser.read(1)
-            if c == b'\n':
+            if c == b"\n":
                 continue
-            if c == b'' or c == b'\r':
+            if c == b"" or c == b"\r":
                 return s
             s += c
 
@@ -75,12 +77,12 @@ class WisunManager(metaclass=ABCMeta):
     def _serialReceive(self, size):
         if self._ser is None:
             sleep(1)
-            return b''
+            return b""
         return self._ser.read(size)
 
     # H/Wリセット
     def reset(self):
-        logger.info('reset()')
+        logger.info("reset()")
         self._reset.on()
         sleep(0.5)
         self._reset.off()
@@ -88,7 +90,7 @@ class WisunManager(metaclass=ABCMeta):
 
     # 終了処理
     def dispose(self):
-        logger.info('dispose')
+        logger.info("dispose")
         self.stopSendTask()
         self.stopReceiveTask()
         self._reset.close()
@@ -145,29 +147,87 @@ class WisunManager(metaclass=ABCMeta):
 
     # WiSUN送信タスク
     def _sndTask(self, queue):
-        logger.info('send task start')
+        logger.info("send task start")
         # initReq 指定プロパティキャッシュしておくため
         # 一度に複数のプロパティを取得すると不安定になる模様なので最低限に絞ってある
-        reqInit = Frame(bytearray(
-            [
-                0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
-                0x01, 0x02, 0x88, 0x01, 0x62,
-                0x03,       # プロパティ数を設定
-                #0x80, 0x00, # 動作状態
-                0xD3, 0x00, # 係数
-                0xE1, 0x00, # 積算電力量単位（正方向、逆方向計測値）
-                0x8A, 0x00, # メーカーコード
-                #0x9D, 0x00, # 状変アナウンスプロパティマップ
-                #0x9E, 0x00, # Set プロパティマップ
-                #0x9F, 0x00  # Get プロパティマップ
-            ]))
+        reqInit = Frame(
+            bytearray(
+                [
+                    0x10,
+                    0x81,
+                    0x00,
+                    0x00,
+                    0x05,
+                    0xFF,
+                    0x01,
+                    0x02,
+                    0x88,
+                    0x01,
+                    0x62,
+                    0x03,  # プロパティ数を設定
+                    # 0x80, 0x00, # 動作状態
+                    0xD3,
+                    0x00,  # 係数
+                    0xE1,
+                    0x00,  # 積算電力量単位（正方向、逆方向計測値）
+                    0x8A,
+                    0x00,  # メーカーコード
+                    # 0x9D, 0x00, # 状変アナウンスプロパティマップ
+                    # 0x9E, 0x00, # Set プロパティマップ
+                    # 0x9F, 0x00  # Get プロパティマップ
+                ]
+            )
+        )
         # 15秒間隔
-        req = Frame(bytearray([0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
-                               0x01, 0x02, 0x88, 0x01, 0x62, 0x02, 0xe7, 0x00, 0xe8, 0x00]))
+        req = Frame(
+            bytearray(
+                [
+                    0x10,
+                    0x81,
+                    0x00,
+                    0x00,
+                    0x05,
+                    0xFF,
+                    0x01,
+                    0x02,
+                    0x88,
+                    0x01,
+                    0x62,
+                    0x02,
+                    0xE7,
+                    0x00,
+                    0xE8,
+                    0x00,
+                ]
+            )
+        )
         # 10分に1回
-        req40 = Frame(bytearray([0x10, 0x81, 0x00, 0x00, 0x05, 0xff,
-                               0x01, 0x02, 0x88, 0x01, 0x62, 0x04,
-                               0xe0, 0x00, 0xe3, 0x00, 0xe7, 0x00, 0xe8, 0x00]))
+        req40 = Frame(
+            bytearray(
+                [
+                    0x10,
+                    0x81,
+                    0x00,
+                    0x00,
+                    0x05,
+                    0xFF,
+                    0x01,
+                    0x02,
+                    0x88,
+                    0x01,
+                    0x62,
+                    0x04,
+                    0xE0,
+                    0x00,
+                    0xE3,
+                    0x00,
+                    0xE7,
+                    0x00,
+                    0xE8,
+                    0x00,
+                ]
+            )
+        )
         cnt = -1
         while not self._stopSendEvent.wait(15.0):
             cnt += 1
@@ -185,15 +245,15 @@ class WisunManager(metaclass=ABCMeta):
                         self.wisunSendFrame(req40)
                     else:
                         self.wisunSendFrame(req)
-        logger.info('send task end')
+        logger.info("send task end")
 
     # 送信一時停止
     def sendPause(self, pause):
         self._sendPause = pause
         if pause:
-            logger.info('Wi-SUN送信停止')
+            logger.info("Wi-SUN送信停止")
         else:
-            logger.info('Wi-SUN送信再開')
+            logger.info("Wi-SUN送信再開")
 
     # Wi-SUN経由Echonet送信
     @abstractmethod

@@ -42,6 +42,12 @@ def restart():
     res = "sample.service をリスタートしました"
     return res
 
+@app.route('/reboot', methods=['GET'])
+def reboot():
+    # wisun-gateway/main.py再起動
+    os.system('sudo systemctl reboot')
+    res = "Wi-SUN ブリッジをリブートしました"
+    return res
 
 if __name__ == "__main__":
     print('start')
