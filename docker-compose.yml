@@ -1,15 +1,14 @@
-version: "3"
 services:
   echonet:
     build:
       context: ./
       dockerfile: echonet.dockerfile
-    command: python3 /home/pi/wisun-gateway/main.py
+    command: python3 /home/debian/python-echonet-lite-docker/main.py
     environment:
       - TZ=JST-9
     volumes:
-      - .:/home/pi/wisun-gateway/
+      - .:/home/debian/python-echonet-lite-docker/
     devices:
-      - "/dev/ttyAMA0:/dev/ttyAMA0"
+      - "/dev/ttyAMA0:/dev/ttyS1"
     ports:
       - "3610:3610/udp"

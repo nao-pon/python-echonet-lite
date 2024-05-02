@@ -1,13 +1,11 @@
 # coding: utf-8
-from echonet_lite import Node
 from wisun_manager_factory import WisunManagerFactory
 from ethernet_manager import EthernetManager
 from property_manager import PropertyManager
 from logging import getLogger, StreamHandler, INFO, Formatter, DEBUG
 import time
 from enum import Enum
-import os
-from threading import Event, Thread
+from threading import Thread
 import signal
 import sys
 from configparser import ConfigParser
@@ -15,15 +13,16 @@ from configparser import ConfigParser
 # ログの設定
 handler = StreamHandler()
 handler.setLevel(DEBUG)
-handler.setFormatter(Formatter(
-    "[%(asctime)s] [%(levelname)s] [%(threadName)s] [%(name)s] %(message)s"))
+handler.setFormatter(
+    Formatter("[%(asctime)s] [%(levelname)s] [%(threadName)s] [%(name)s] %(message)s")
+)
 logger = getLogger()
 logger.addHandler(handler)
 logger.setLevel(INFO)
 
 # config
 iniFile = ConfigParser()
-iniFile.read('/home/pi/wisun-gateway/config.ini')
+iniFile.read("/home/debian/python-echonet-lite-docker/config.ini")
 
 # Wi-SUNマネージャ
 wm = WisunManagerFactory.createInstance()
@@ -33,6 +32,7 @@ em = EthernetManager()
 pm = PropertyManager()
 pm.setWisunManager(wm)
 pm.setEthernetManager(em)
+
 
 class ConnectState(Enum):
     DISCONNECT = 0
@@ -70,33 +70,38 @@ def main():
 
     while True:
         _conState = connect_state
-        if wm is not None and wm._lastPutTime is not None and wm._lastPutTime + 300 < time.time():
+        if (
+            wm is not None
+            and wm._lastPutTime is not None
+            and wm._lastPutTime + 300 < time.time()
+        ):
             wm.disconnect()
             startConnect()
             _conState = connect_state
 
         if _conState == ConnectState.CONNECTED:
-                # Wi-SUN manager の初期リクエストフラグ設定
-                wm._initReq = True
-                _conState = connect_state = ConnectState.INITIALIZING
+            # Wi-SUN manager の初期リクエストフラグ設定
+            wm._initReq = True
+            _conState = connect_state = ConnectState.INITIALIZING
         if _conState == ConnectState.INITIALIZING:
             # 初期リクエストでメーカーコードがキャッシュされるのを待つ
-            unit = pm._cache.get(0xe1)  # 積算電力量単位（正方向、逆方向計測値）
-            mcode = pm._cache.get(0x8a) # メーカーコード
+            unit = pm._cache.get(0xE1)  # 積算電力量単位（正方向、逆方向計測値）
+            mcode = pm._cache.get(0x8A)  # メーカーコード
             if unit is not None and mcode is not None:
                 if len(mcode.EDT):
                     # echonet_lite/__init__.py の Node _mcode プロパティへ設定
                     em._node._mcode = mcode.EDT
-                if len(unit.EDT): # 積算電力量単位は必須
+                if len(unit.EDT):  # 積算電力量単位は必須
                     wm._initReq = False
                     _conState = connect_state = ConnectState.ACQUIRING
         if _conState == ConnectState.ACQUIRING:
-            if pm._cache.get(0xe7) is not None:
+            if pm._cache.get(0xE7) is not None:
                 _conState = connect_state = ConnectState.READY
 
         pre_state = connect_state
 
         time.sleep(0.1)
+
 
 # Wi-SUN接続タスク起動
 
@@ -110,6 +115,7 @@ def startConnect():
     thread = Thread(target=connect_task)
     thread.start()
 
+
 # Wi-SUN接続タスク
 
 
@@ -117,13 +123,13 @@ def connect_task():
     global thread
     global connect_state
     # スマートメータ接続
-    logger.info('接続開始')
+    logger.info("接続開始")
     connected = wm.connect()
     if connected:
-        logger.info('接続成功')
+        logger.info("接続成功")
         connect_state = ConnectState.CONNECTED
     else:
-        logger.info('接続失敗')
+        logger.info("接続失敗")
         connect_state = ConnectState.CONNECT_ERROR
     thread = None
 
@@ -138,14 +144,14 @@ def dispose():
 
 
 def termed(signum, frame):
-    logger.info('SIGTERM!')
+    logger.info("SIGTERM!")
     dispose()
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        logger.info('KeyboardInterrupt')
+        logger.info("KeyboardInterrupt")
         dispose()
