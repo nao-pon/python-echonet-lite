@@ -1,4 +1,5 @@
 # coding: utf-8
+from dgbox_led import DGboxLed
 from wisun_manager_factory import WisunManagerFactory
 from ethernet_manager import EthernetManager
 from property_manager import PropertyManager
@@ -19,8 +20,11 @@ logger = getLogger()
 logger.addHandler(handler)
 logger.setLevel(INFO)
 
+# On-bord LEDs
+boxled = DGboxLed()
 # Wi-SUNマネージャ
 wm = WisunManagerFactory.createInstance()
+wm._boxled = boxled
 # Ethernetマネージャ
 em = EthernetManager()
 # Propertyマネージャ
@@ -78,6 +82,7 @@ def main():
             # Wi-SUN manager の初期リクエストフラグ設定
             wm._initReq = True
             _conState = connect_state = ConnectState.INITIALIZING
+            boxled.off(4)
         if _conState == ConnectState.INITIALIZING:
             # 初期リクエストでメーカーコードがキャッシュされるのを待つ
             unit = pm._cache.get(0xE1)  # 積算電力量単位（正方向、逆方向計測値）
@@ -89,9 +94,11 @@ def main():
                 if len(unit.EDT):  # 積算電力量単位は必須
                     wm._initReq = False
                     _conState = connect_state = ConnectState.ACQUIRING
+                    boxled.off(3)
         if _conState == ConnectState.ACQUIRING:
             if pm._cache.get(0xE7) is not None:
                 _conState = connect_state = ConnectState.READY
+                boxled.off(2)
 
         pre_state = connect_state
 
@@ -106,6 +113,9 @@ def startConnect():
         return
     global thread
     global connect_state
+    boxled.on(2)
+    boxled.on(3)
+    boxled.on(4)
     connect_state = ConnectState.CONNECTING
     thread = Thread(target=connect_task)
     thread.start()
@@ -136,6 +146,7 @@ def dispose():
     if wm is not None:
         wm.disconnect()
         wm.dispose()
+    boxled.clear()
 
 
 def termed(signum, frame):

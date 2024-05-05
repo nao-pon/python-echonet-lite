@@ -62,8 +62,10 @@ class WisunManager(WisunManager):
         while not self._stopReceiveEvent:
             line = self._serialReceiveLine()
             if line == b"":
+                self.signalled(0)
                 # timeout
                 continue
+            self.signalled(1)
             logger.info("recv <- {0}".format(line))
             if line.startswith(b"ERXUDP"):
                 cols = line.split(b" ")
