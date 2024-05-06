@@ -27,29 +27,29 @@
 
 - Debian 化の成功事例[秋月のSoC基板 (白い箱) にDebianを入れる](https://qiita.com/chibiegg/items/4b1b70a5ba09c4a52a12) に沿って Debian を稼働できる状態にします。
 
-- 【sudo コマンドのパスワードなし設定】
-    - apt, cp, systemctl, pip3 コマンドを sudo でパスワードなしで実行できるように設定します。
-        ```
-        sudo cp ./dgwisun.sudoers /etc/sudoers.d/dgwisun
-        sudo chmod 0440 /etc/sudoers.d/dgwisun
-        ```
-
 - 【ソース取得】
     - SSH で接続し debian でログインしてソースを取得します。
-        ```
-        sudo apt update
-        sudo apt upgrade
-        sudo apt -y install git
-        git clone -b dg-wisun https://github.com/nao-pon/python-echonet-lite dg-wisun
-        ```
+    ```
+    sudo apt update
+    sudo apt upgrade
+    sudo apt -y install git
+    git clone -b dg-wisun https://github.com/nao-pon/python-echonet-lite dg-wisun
+    ```
+- 【sudo コマンドのパスワードなし設定】
+    - apt, cp, systemctl, pip3 コマンドを sudo でパスワードなしで実行できるように設定します。
+    ```
+    cd dg-wisun
+    sudo cp ./dgwisun.sudoers /etc/sudoers.d/dgwisun
+    sudo chmod 0440 /etc/sudoers.d/dgwisun
+    ```
+
 - 【インストール】
     - 依存ライブラリ取得
     - 関連ツールのインストール
     - 自動起動設定
-        ```
-        ~ $ cd dg-wisun
-        ~/dg-wisun $ sh install.sh
-        ```
+    ```
+    sh install.sh
+    ```
 
 ## 設定
 
