@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>DG Wi-SUN Ethernet Converter</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+
+<body>
+    <h1>Wi-SUN Ethernet Converter</h1>
+    <!-- メインコンテンツ -->
+    <form action="/register" method="post">
+        <p>
+            <label id="label-bid" for="bid">ＢルートＩＤ</label>
+            <input name="bid" id="bid" type="input" value="{{ini.bid}}"/>
+        </p>
+        <p>
+            <label id="label-pwd" for="pwd">Ｂルートパスワード</label>
+            <input name="pwd" id="pwd" type="input" value="{{ini.pwd}}"/>
+        </p>
+        <p>
+            <label id="label-ser" for="ser">シリアルポート</label>
+            <select name="ser" id="ser">
+                {% for device in devices %}
+                <option {% if device == ini.dev%}selected{% endif %}>{{ device }}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <button id="btn-reg" name="post-value">登録</button>
+    </form>
+    <p><button id="btn-restart" name="post-value" onclick="location.href='./restart'">サービス再起動</button></p>
+    <p><button id="btn-reboot" name="post-value" onclick="location.href='./reboot'">システム再起動</button></p>
+</body>
+
+</html>

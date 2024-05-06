@@ -1,0 +1,9 @@
+[Unit]
+Description=DG Wi-SUN Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/debian/dg-wisun/main.py
+
+[Install]
+WantedBy=multi-user.target

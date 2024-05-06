@@ -1,0 +1,14 @@
+[Unit]
+Description=uWSGI instance to serve uwsgi
+After=network.target
+
+[Service]
+User=debian
+Group=debian
+WorkingDirectory=/home/debian/dg-wisun/nginx
+Environment="LD_LIBRARY_PATH=/usr/lib"
+ExecStart=/usr/bin/uwsgi --uid debian --ini /home/debian/dg-wisun/nginx/uwsgi.ini
+
+[Install]
+WantedBy=multi-user.target
+

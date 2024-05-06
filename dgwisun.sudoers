@@ -1,0 +1,4 @@
+debian ALL=NOPASSWD: /bin/apt
+debian ALL=NOPASSWD: /bin/cp
+debian ALL=NOPASSWD: /bin/systemctl
+debian ALL=NOPASSWD: /usr/bin/pip3
