@@ -38,7 +38,7 @@ def register():
         with open(INI_FILE, "w") as fp:
             iniFile.write(fp)
         # wisun-gateway/main.py再起動
-        os.system("sudo systemctl restart dgwisun.service")
+        subprocess.run(["sudo", "systemctl", "restart", "dgwisun.service"])
         res = "config.ini を更新しました"
     return res
 
