@@ -12,7 +12,7 @@ fi
 sudo cp ./nginx/default.conf /etc/nginx/conf.d/default.conf
 sudo cp ./nginx/uwsgi.service /etc/systemd/system
 sudo cp ./dgwisun.service /etc/systemd/system
-sudo cp ./config.ini.default ./config.ini
+cp ./config.ini.default ./config.ini
 sudo systemctl enable uwsgi.service
 sudo systemctl restart nginx
 sudo systemctl restart uwsgi.service
