@@ -24,7 +24,7 @@ logger.setLevel(INFO)
 boxled = DGboxLed()
 # Wi-SUNマネージャ
 wm = WisunManagerFactory.createInstance()
-wm._boxled = boxled
+wm.setBoxled(boxled)
 # Ethernetマネージャ
 em = EthernetManager()
 # Propertyマネージャ

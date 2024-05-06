@@ -44,6 +44,7 @@ class WisunManager(metaclass=ABCMeta):
             self._sendPause = False
             self._initReq = False
             self._lastPutTime = None
+            self._boxled = None
 
     # シリアル送信
     def _serialSendLine(self, str):
@@ -244,11 +245,14 @@ class WisunManager(metaclass=ABCMeta):
             logger.info("Wi-SUN送信再開")
 
     def signalled(self, state):
-        if hasattr(self, "_boxled"):
+        if self._boxled != None:
             if state:
                 self._boxled.on(1)
             else:
                 self._boxled.off(1)
+
+    def setBoxled(self, boxled):
+        self._boxled = boxled
 
     # Wi-SUN経由Echonet送信
     @abstractmethod
