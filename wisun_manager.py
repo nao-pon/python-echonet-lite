@@ -51,6 +51,7 @@ class WisunManager(metaclass=ABCMeta):
         if self._ser is None:
             return False
         try:
+            self.signalledBlink()
             self._ser.write(str)
             return True
         except serial.serialutil.SerialTimeoutException:
@@ -68,6 +69,7 @@ class WisunManager(metaclass=ABCMeta):
             if c == b"\n":
                 continue
             if c == b"" or c == b"\r":
+                self.signalledBlink()
                 return s
             s += c
 
@@ -76,6 +78,7 @@ class WisunManager(metaclass=ABCMeta):
         if self._ser is None:
             sleep(1)
             return b""
+        self.signalledBlink()
         return self._ser.read(size)
 
     # 終了処理
@@ -244,12 +247,15 @@ class WisunManager(metaclass=ABCMeta):
         else:
             logger.info("Wi-SUN送信再開")
 
-    def signalled(self, state):
+    def signalledBlink(self):
+        async def blink():
+            self._boxled.on(1)
+            await asyncio.sleep(0.1)
+            self._boxled.off(1)
+
         if self._boxled != None:
-            if state:
-                self._boxled.on(1)
-            else:
-                self._boxled.off(1)
+            thread = Thread(target=lambda: asyncio.run(blink()))
+            thread.start()
 
     def setBoxled(self, boxled):
         self._boxled = boxled
