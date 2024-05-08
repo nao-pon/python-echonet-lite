@@ -5,6 +5,7 @@ from ethernet_manager import EthernetManager
 from property_manager import PropertyManager
 from logging import getLogger, StreamHandler, INFO, Formatter, DEBUG
 import time
+from time import sleep
 from enum import Enum
 from threading import Thread
 import signal
@@ -50,6 +51,8 @@ if wm is None:
 else:
     connect_state = ConnectState.DISCONNECT
 
+wm.setConnectState(connect_state)
+
 
 def main():
     global thread
@@ -68,6 +71,7 @@ def main():
     startConnect()
 
     while True:
+        wm.setConnectState(connect_state)
         _conState = connect_state
         if (
             wm is not None

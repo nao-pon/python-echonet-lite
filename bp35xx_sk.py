@@ -27,7 +27,6 @@ class WisunManager(WisunManager):
         return self._sendAndWaitOk(b"SKVER\r\n")
 
     def _sendAndWaitOk(self, statement):
-        logger.info("send -> {0}".format(statement))
         if self._serialSendLine(statement) is False:
             return False
         return self._waitOk(statement)
@@ -64,7 +63,6 @@ class WisunManager(WisunManager):
             if line == b"":
                 # timeout
                 continue
-            logger.info("recv <- {0}".format(line))
             if line.startswith(b"ERXUDP"):
                 cols = line.split(b" ")
                 port = int(cols[4], 16)
@@ -188,13 +186,22 @@ class WisunManager(WisunManager):
                 ipv6Addr = line.strip()
                 break
         self._serialSendLine("SKJOIN {0}\r\n".format(ipv6Addr.decode()).encode())
+        authRetry = 12  # 5 min * 12 = 1 hour
         # 接続完了待ち
         while True:
             # line = self._serialReceiveLine()
             try:
                 line = self._queueRecv.get(True, 30)
                 if line.startswith(b"EVENT 24"):
-                    break
+                    # 認証失敗 -> 再認証
+                    if authRetry < 0:
+                        return False
+                    authRetry = authRetry - 1
+                    logger.info("認証失敗のため 300 秒後に再認証開始")
+                    time.sleep(300)
+                    self._serialSendLine(
+                        "SKJOIN {0}\r\n".format(ipv6Addr.decode()).encode()
+                    )
                 elif line.startswith(b"EVENT 25"):
                     break
             except Empty:

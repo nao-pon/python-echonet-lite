@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 /home/debian/dg-wisun/main.py
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

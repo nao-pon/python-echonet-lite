@@ -45,13 +45,15 @@ class WisunManager(metaclass=ABCMeta):
             self._initReq = False
             self._lastPutTime = None
             self._boxled = None
+            self._connectState = None
 
     # シリアル送信
     def _serialSendLine(self, str):
         if self._ser is None:
             return False
         try:
-            self.signalledBlink()
+            logger.info("send -> {0}".format(str))
+            self.signalLedBlink()
             self._ser.write(str)
             return True
         except serial.serialutil.SerialTimeoutException:
@@ -69,7 +71,9 @@ class WisunManager(metaclass=ABCMeta):
             if c == b"\n":
                 continue
             if c == b"" or c == b"\r":
-                self.signalledBlink()
+                if s != b"":
+                    self.signalLedBlink()
+                    logger.info("recv <- {0}".format(s))
                 return s
             s += c
 
@@ -78,7 +82,7 @@ class WisunManager(metaclass=ABCMeta):
         if self._ser is None:
             sleep(1)
             return b""
-        self.signalledBlink()
+        self.signalLedBlink()
         return self._ser.read(size)
 
     # 終了処理
@@ -126,6 +130,7 @@ class WisunManager(metaclass=ABCMeta):
         self._queueSend = SetQueue()
         self._sndThread = Thread(target=self._sndTask, args=(self._queueSend,))
         self._stopSendEvent = Event()
+        self._clearReceiveQueue()
         self._sndThread.start()
 
     # 送信タスク終了
@@ -231,6 +236,7 @@ class WisunManager(metaclass=ABCMeta):
             except Empty:
                 if self._initReq:
                     self.wisunSendFrame(reqInit)
+                    sleep(15)
                 else:
                     if cnt == 0 or cnt > 40:
                         cnt = 0
@@ -247,7 +253,7 @@ class WisunManager(metaclass=ABCMeta):
         else:
             logger.info("Wi-SUN送信再開")
 
-    def signalledBlink(self):
+    def signalLedBlink(self):
         async def blink():
             self._boxled.on(1)
             await asyncio.sleep(0.1)
@@ -257,8 +263,29 @@ class WisunManager(metaclass=ABCMeta):
             thread = Thread(target=lambda: asyncio.run(blink()))
             thread.start()
 
+    def stateLedsBlinking(self):
+        from main import ConnectState
+
+        async def blinking():
+            while self._connectState == ConnectState.CONNECT_ERROR:
+                self._boxled.on(2)
+                self._boxled.on(3)
+                self._boxled.on(4)
+                await asyncio.sleep(0.5)
+                self._boxled.off(2)
+                self._boxled.off(3)
+                self._boxled.off(4)
+                await asyncio.sleep(0.5)
+
+        if self._boxled != None:
+            thread = Thread(target=lambda: asyncio.run(blinking()))
+            thread.start()
+
     def setBoxled(self, boxled):
         self._boxled = boxled
+
+    def setConnectState(self, state):
+        self._connectState = state
 
     # Wi-SUN経由Echonet送信
     @abstractmethod
