@@ -73,11 +73,14 @@ def main():
     while True:
         wm.setConnectState(connect_state)
         _conState = connect_state
+        if _conState == ConnectState.CONNECT_ERROR:
+            logger.info("再接続まで 3600 秒待ちます")
+            time.sleep(3600)
         if (
             wm is not None
             and wm._lastPutTime is not None
             and wm._lastPutTime + 300 < time.time()
-        ):
+        ) or _conState == ConnectState.CONNECT_ERROR:
             wm.disconnect()
             startConnect()
             _conState = connect_state

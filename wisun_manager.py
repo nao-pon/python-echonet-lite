@@ -263,24 +263,6 @@ class WisunManager(metaclass=ABCMeta):
             thread = Thread(target=lambda: asyncio.run(blink()))
             thread.start()
 
-    def stateLedsBlinking(self):
-        from main import ConnectState
-
-        async def blinking():
-            while self._connectState == ConnectState.CONNECT_ERROR:
-                self._boxled.on(2)
-                self._boxled.on(3)
-                self._boxled.on(4)
-                await asyncio.sleep(0.5)
-                self._boxled.off(2)
-                self._boxled.off(3)
-                self._boxled.off(4)
-                await asyncio.sleep(0.5)
-
-        if self._boxled != None:
-            thread = Thread(target=lambda: asyncio.run(blinking()))
-            thread.start()
-
     def setBoxled(self, boxled):
         self._boxled = boxled
 

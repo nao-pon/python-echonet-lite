@@ -194,7 +194,7 @@ class WisunManager(WisunManager):
                 line = self._queueRecv.get(True, 30)
                 if line.startswith(b"EVENT 24"):
                     # 認証失敗 -> 再認証
-                    if authRetry < 0:
+                    if authRetry < 1:
                         return False
                     authRetry = authRetry - 1
                     logger.info("認証失敗のため 300 秒後に再認証開始")
